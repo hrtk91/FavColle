@@ -1,0 +1,70 @@
+﻿<Window x:Class="FavColle.ProfileWindow"
+        x:Name="self"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:FavColle"
+        xmlns:v="clr-namespace:FavColle.View"
+        xmlns:vm="clr-namespace:FavColle.ViewModel"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity" 
+        xmlns:ei="http://schemas.microsoft.com/expression/2010/interactions"
+        mc:Ignorable="d"
+        Title="ProfileWindow" Height="500" Width="300">
+    
+    <Window.DataContext>
+        <vm:ProfileWindowViewModel/>
+    </Window.DataContext>
+    
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Resource\FlatButton.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Loaded">
+            <i:InvokeCommandAction
+                Command="{Binding InitializeCommand}"
+                CommandParameter="{Binding ElementName=self}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="0.5*"/>
+            <RowDefinition Height="9*"/>
+            <RowDefinition Height="0.5*"/>
+        </Grid.RowDefinitions>
+        <Button Content="お気に入り一括取得" Command="{Binding Path=GetFavoritesCommand}" Grid.Row="0"/>
+        <ListBox ItemsSource="{Binding Path=Favorites}"  ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.CanContentScroll="False" Grid.Row="1">
+            <ListBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel/>
+                </ItemsPanelTemplate>
+            </ListBox.ItemsPanel>
+            <ListBox.ItemContainerStyle>
+                <Style>
+                    <Setter Property="ListBoxItem.HorizontalContentAlignment" Value="Stretch"/>
+                </Style>
+            </ListBox.ItemContainerStyle>
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <v:TweetControl/>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        <StatusBar Name="SBar" Grid.Row="2">
+            <StatusBarItem>
+                <TextBlock Text="{Binding Path=ProgressLabel, UpdateSourceTrigger=PropertyChanged}" Width="auto"/>
+            </StatusBarItem>
+            <StatusBarItem HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+                <ProgressBar Name="ProgressBar"
+                            Value="{Binding Path=ProgressValue}"
+                            Maximum="{Binding Path=ProgressMaximum}"/>
+            </StatusBarItem>
+        </StatusBar>
+    </Grid>
+</Window>

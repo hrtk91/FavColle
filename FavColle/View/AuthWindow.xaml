@@ -1,0 +1,25 @@
+﻿<Window x:Class="FavColle.AuthWindow"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:FavColle"
+             xmlns:vm="clr-namespace:FavColle.ViewModel"
+             mc:Ignorable="d" 
+             Height="100" Width="230" WindowStyle="ToolWindow"
+             x:Name="this">
+    <Window.DataContext>
+        <vm:AuthWindowViewModel/>
+    </Window.DataContext>
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Resource\FlatButton.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+    <Grid Background="White">
+        <TextBox Width="110" Height="25" ToolTip="PINコード" Margin="10,10,65,8" Text="{Binding PIN, UpdateSourceTrigger=PropertyChanged}"/>
+        <Button Width="50" Height="25" Content="認証" Command="{Binding AuthButton}" CommandParameter="{Binding ElementName=this}" RenderTransformOrigin="1.48,0.64" Margin="132,10,10,8"/>
+    </Grid>
+</Window>

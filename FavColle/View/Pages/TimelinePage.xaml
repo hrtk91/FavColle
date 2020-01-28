@@ -1,0 +1,72 @@
+﻿<Page x:Class="FavColle.View.Pages.TimelinePage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity" 
+      xmlns:v="clr-namespace:FavColle.View"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Title="TimelinePage"
+      x:Name="this">
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Loaded">
+            <i:InvokeCommandAction Command="{Binding Path=TimelineInitializedCommand}" CommandParameter="{Binding ElementName=this}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+    <Grid>
+        <ListBox x:Name="TweetListBox" ItemsSource="{Binding Path=TweetList}" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.CanContentScroll="False">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <v:TweetControl/>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+            <ListBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Vertical"/>
+                </ItemsPanelTemplate>
+            </ListBox.ItemsPanel>
+            <ListBox.ItemContainerStyle>
+                <Style TargetType="ListBoxItem">
+                    <Setter Property="OverridesDefaultStyle" Value="True"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="ListBoxItem">
+                                <ControlTemplate.Triggers>
+                                </ControlTemplate.Triggers>
+                                <Border Name="Bd" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="true">
+                                    <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                                </Border>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                    <Setter Property="Background" Value="Black"/>
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </ListBox.ItemContainerStyle>
+        </ListBox>
+        <Button Name="popupButton" VerticalAlignment="Top" Visibility="Hidden">
+            <Button.Triggers>
+            </Button.Triggers>
+            <StackPanel>
+                <TextBlock Text="Display your popup"/>
+                <Popup Name="popup">
+                    <Popup.Style>
+                        <Style TargetType="{x:Type Popup}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsMouseOver, ElementName=popupButton}" Value="True">
+                                    <Setter Property="IsOpen" Value="True"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Popup.Style>
+                    <TextBlock Text="Popup Test" Background="LightBlue" Foreground="Blue"/>
+                </Popup>
+            </StackPanel>
+        </Button>
+    </Grid>
+</Page>
