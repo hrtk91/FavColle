@@ -52,7 +52,7 @@ namespace FavColle.ViewModel
 		{
 			if (IconSource.Data == null)
 			{
-				await IconSource.Download();
+				await IconSource.Download(SizeOpt.Small);
 			}
 
 			using (var ms = new MemoryStream(IconSource.Data))
@@ -75,7 +75,7 @@ namespace FavColle.ViewModel
 			if (MediaSources == null) return this;
 
 			MediaSources = await Task.WhenAll(
-				MediaSources.Select(media => media.Download()));
+				MediaSources.Select(media => media.Download(SizeOpt.Small)));
 
 			Medias = new ObservableCollection<ImageSource>(MediaSources.Select(media =>
 			{

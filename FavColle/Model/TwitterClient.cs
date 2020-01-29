@@ -369,7 +369,7 @@ namespace FavColle.Model
 
 			System.Net.ServicePointManager.DefaultConnectionLimit = 16;
 
-			var imagelist = downloadlist.Select(image => image.Download());
+			var imagelist = downloadlist.Select(image => image.Download(SizeOpt.Orig));
 			imagelist.ToList().ForEach(it =>
 			{
 				it.ContinueWith(task =>

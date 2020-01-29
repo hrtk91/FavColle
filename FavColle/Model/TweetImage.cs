@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using FavColle.Model;
 
 namespace FavColle.Model
 {
@@ -22,12 +23,14 @@ namespace FavColle.Model
 		}
 
 
-		public async Task<TweetImage> Download()
+		public async Task<TweetImage> Download(SizeOpt size = SizeOpt.Small)
 		{
 			var client = new CachedWebClient();
 			try
 			{
-				Data = await client.DownloadDataAsync(Url);
+                // var imageUrl = $"{Url}{size.Attribute()}";
+                var imageUrl = Url;
+				Data = await client.DownloadDataAsync(imageUrl);
 				return this;
 			}
 			catch (WebException e)
@@ -78,7 +81,7 @@ namespace FavColle.Model
 
         public async Task SaveAsync(string directory, string filename)
 		{
-            if (Data == null) await Download();
+            if (Data == null) await Download(SizeOpt.Orig);
 
 			var filepath = directory + filename;
 			if (File.Exists(filepath) == true) return;
