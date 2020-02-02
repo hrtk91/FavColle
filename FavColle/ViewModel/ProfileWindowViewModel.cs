@@ -1,4 +1,5 @@
-﻿using FavColle.Model;
+﻿using FavColle.DIContainer;
+using FavColle.Model;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -70,9 +71,7 @@ namespace FavColle.ViewModel
 		{
 			try
 			{
-				var client = new TwitterClient();
-                await client.Initialize();
-				await client.Authorize();
+				var client = DI.Resolve<TwitterClient>();
 				var favorites = await client.GetMyFavorites();
 				var contents = await Task.WhenAll(favorites.Select(async tweet =>
 				{
@@ -104,10 +103,7 @@ namespace FavColle.ViewModel
 
 		public async void GetFavorites(object obj)
 		{
-			var client = new TwitterClient();
-            await client.Initialize();
-			await client.Authorize();
-
+			var client = DI.Resolve<TwitterClient>();
 			client.FavoritesRetrievingEvent += async (o, e) =>
 			{
 				if (e.HasReachedRateLimit == true)

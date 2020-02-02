@@ -7,8 +7,15 @@
              xmlns:v="clr-namespace:FavColle.View"
              xmlns:vm="clr-namespace:FavColle.ViewModel"
              mc:Ignorable="d" 
-             d:DesignHeight="600" d:DesignWidth="300" HorizontalAlignment="Stretch"
+             d:DesignHeight="300" d:DesignWidth="600" HorizontalAlignment="Stretch"
              x:Name="this">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Resource\FavRetButton.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
     <Grid Background="White">
         <Grid.RowDefinitions>
             <RowDefinition Height="0.5*"/>
@@ -77,32 +84,44 @@
         </Grid>
         <Grid Grid.Row="2">
             <StackPanel Orientation="Horizontal">
-                <Button Name="ReTweet" Content="RT">
-                    <!--
-                    <Button.Template>
-                        <ControlTemplate>
-                            <Image>
-                                <Image.Source>
-                                    <ImageSource>/FavColle;component/Resources/retweet.png</ImageSource>
-                                </Image.Source>
-                            </Image>
-                        </ControlTemplate>
-                    </Button.Template>
-                    -->
+                <Button Name="Retweet" Content="Retweet"
+                        Command="{Binding Path=RetweetCommand}"
+                        CommandParameter="{Binding ElementName=this}">
+                    <Button.Style>
+                        <Style TargetType="{x:Type Button}" BasedOn="{StaticResource FavRetButton}">
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="BorderBrush" Value="DeepSkyBlue"/>
+                                </Trigger>
+                                <DataTrigger Binding="{Binding IsRetweeted, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Value="True">
+                                    <Setter Property="Background" Value="LightGreen"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsRetweeted, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Value="False">
+                                    <Setter Property="Background" Value="White"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
                 </Button>
                 <Label Content="{Binding Path=RetweetCount}"/>
-                <Button Name="Favorit" Content="FAV">
-                    <!--
-                    <Button.Template>
-                        <ControlTemplate>
-                            <Image>
-                                <Image.Source>
-                                    <ImageSource>/FavColle;component/Resources/like.svg</ImageSource>
-                                </Image.Source>
-                            </Image>
-                        </ControlTemplate>
-                    </Button.Template>
-                    -->
+                <Button Name="Favorite" Content="Favorite"
+                    Command="{Binding Path=FavoriteCommand}"
+                    CommandParameter="{Binding ElementName=this}">
+                    <Button.Style>
+                        <Style TargetType="{x:Type Button}" BasedOn="{StaticResource FavRetButton}">
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="BorderBrush" Value="DeepSkyBlue"/>
+                                </Trigger>
+                                <DataTrigger Binding="{Binding IsFavorited, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Value="True">
+                                    <Setter Property="Background" Value="Orange"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsFavorited, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Value="False">
+                                    <Setter Property="Background" Value="White"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
                 </Button>
                 <Label Content="{Binding Path=FavoriteCount}"/>
             </StackPanel>
