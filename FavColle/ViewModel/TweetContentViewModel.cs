@@ -6,11 +6,12 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using FavColle.DIContainer;
 using FavColle.Model;
 
 namespace FavColle.ViewModel
 {
-	public class TweetContent
+	public class TweetContent : ViewModelBase
 	{
 		private TweetImage IconSource { get; set; }
 		public ImageSource Icon { get; set; }
@@ -23,8 +24,24 @@ namespace FavColle.ViewModel
 		public int RetweetCount { get; set; }
 		public int FavoriteCount { get; set; }
         public string OriginUser { get; set; }
+
+        private bool _isRetweeted = false;
+        public bool IsRetweeted
+        {
+            get => _isRetweeted;
+            set { _isRetweeted = value; RaisePropertyChanged(); }
+        }
+
+        private bool _isFavorited = false;
+        public bool IsFavorited
+        { 
+            get => _isFavorited;
+            set { _isFavorited = value; RaisePropertyChanged(); }
+        }
         
 		public DelegateCommand ImagePushedCommand { get; set; }
+        public DelegateCommand RetweetCommand { get; set; }
+        public DelegateCommand FavoriteCommand { get; set; }
         
 		public TweetContent(Tweet tweet)
 		{
@@ -34,11 +51,15 @@ namespace FavColle.ViewModel
 			ScreenName = tweet.ScreenName;
 			TweetText = tweet.Text;
 			MediaSources = tweet.Medias;
+            IsRetweeted = tweet.IsRetweet;
+            IsFavorited = tweet.IsFavorited;
 			RetweetCount = tweet.RetweetCount ?? 0;
 			FavoriteCount = tweet.FavoriteCount ?? 0;
             OriginUser = tweet.IsRetweet ? $"{tweet.OriginUser.ScreenName}がリツイート" : "";
 
 			ImagePushedCommand = new DelegateCommand(ImagePushed, (obj) => true);
+            RetweetCommand = new DelegateCommand(Retweet, (obj) => true);
+            FavoriteCommand = new DelegateCommand(Favorite, (obj) => true);
         }
 
         public async Task<TweetContent> DownloadIconAndMedias()
@@ -116,7 +137,45 @@ namespace FavColle.ViewModel
 				await image.SaveAsAsync(directory, filename);
 			});
 		}
-	}
+
+        public async void Retweet(object obj)
+        {
+            if (!(obj is View.TweetControl content) || IsRetweeted) return;
+
+            var client = DI.Resolve<TwitterClient>();
+
+            if (!IsRetweeted)
+            {
+                IsRetweeted = true;
+                await client.Retweet(Id);
+            }
+            else
+            {
+                IsRetweeted = false;
+                await client.UnRetweet(Id);
+            }
+        }
+
+        public async void Favorite(object obj)
+        {
+            if (!(obj is View.TweetControl content)) return;
+
+            var client = DI.Resolve<TwitterClient>();
+
+            if (!IsFavorited)
+            {
+                IsFavorited = true;
+                FavoriteCount++;
+                await client.Favorite(Id);
+            }
+            else
+            {
+                IsFavorited = false;
+                FavoriteCount--;
+                await client.UnFavorite(Id);
+            }
+        }
+    }
 
 
 

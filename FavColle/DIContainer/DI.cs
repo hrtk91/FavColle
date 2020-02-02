@@ -12,14 +12,13 @@ namespace FavColle.DIContainer
 
         public static T Register<T>() where T : class, new()
         {
-            var obj = new T();
-            objects.Add(typeof(T).Name, obj);
+            objects.Add(typeof(T).Name, new T());
 
-            return obj;
+            return Resolve<T>();
         }
 
 
-        public static T Get<T>() where T : class, new()
+        public static T Resolve<T>() where T : class, new()
         {
             return (T)objects.Where(pair => pair.Key == typeof(T).Name).First().Value;
         }

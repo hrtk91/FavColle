@@ -7,6 +7,7 @@ using System.Windows.Media;
 using System;
 using System.Diagnostics;
 using System.Collections.Generic;
+using FavColle.DIContainer;
 using FavColle.Model;
 using FavColle.Service;
 
@@ -16,7 +17,7 @@ namespace FavColle.ViewModel
 	{
 		public bool IsGettingTimeline { get; private set; } = false;
 
-        public TwitterClient Client { get; private set; } = new TwitterClient();
+        public TwitterClient Client { get; protected set; }
         public string InputBox { get; set; } = string.Empty;
         public ObservableCollection<TweetContent> TweetList { get; private set; } = new ObservableCollection<TweetContent>();
 
@@ -45,6 +46,7 @@ namespace FavColle.ViewModel
                 throw new InvalidOperationException("Invalid Process Exception");
             }
 
+            Client = DI.Register<TwitterClient>();
             await Client.Initialize();
             await Authorize(window);
 			
@@ -191,8 +193,7 @@ namespace FavColle.ViewModel
         
 		private async Task Authorize(MainWindow window)
         {
-            var authed = await Client.Authorize();
-            if (authed == true)
+            if (await Client.Authorize())
             {
                 (ScreenName, ProfileIcon) = await Client.GetProfile();
                 HomeTimelineCommand.Execute(null);

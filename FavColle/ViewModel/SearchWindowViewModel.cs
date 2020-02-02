@@ -8,6 +8,7 @@ using System.Windows.Media;
 using System.Windows.Controls;
 using System.Diagnostics;
 using FavColle.Model;
+using FavColle.DIContainer;
 
 namespace FavColle.ViewModel
 {
@@ -57,8 +58,7 @@ namespace FavColle.ViewModel
 			scrollViewer.ScrollChanged += ScrollChanged;
 
 
-			var client = new TwitterClient();
-			await client.Authorize();
+			var client = DI.Resolve<TwitterClient>();
 			var tweets = await client.Search(SearchWord);
 			var contents = tweets.Select(tweet => new TweetContent(tweet)).ToList();
 			contents.ForEach(Dispatch<TweetContent>(TweetList.Add));
@@ -85,9 +85,7 @@ namespace FavColle.ViewModel
 			try
 			{
 				Searching = true;
-				var client = new TwitterClient();
-                await client.Initialize();
-                await client.Authorize();
+				var client = DI.Resolve<TwitterClient>();
 
 				var maxid = TweetList?.Min(tweet => tweet.Id) - 1;
 

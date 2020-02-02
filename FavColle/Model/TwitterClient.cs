@@ -159,15 +159,7 @@ namespace FavColle.Model
 
         private Tweet GetTweetContent(Status status)
         {
-            return new Tweet(
-                status.User.ProfileImageUrl,
-                status.User.Name,
-                status.User.ScreenName,
-                status.Id,
-                status.FullText ?? status.Text,
-                (bool)status.IsRetweeted,
-                (int)status.RetweetCount,
-                (int)status.FavoriteCount);
+            return new Tweet(status);
         }
 
         private Tweet GetRetweetContent(Status status)
@@ -177,10 +169,12 @@ namespace FavColle.Model
                 retweet.User.ProfileImageUrl,
                 retweet.User.Name,
                 retweet.User.ScreenName,
-                status.Id, retweet.FullText ?? retweet.Text,
-                retweet != null,
-                (int)retweet.RetweetCount,
-                (int)retweet.FavoriteCount,
+                status.Id,
+                retweet.FullText ?? retweet.Text,
+                status.IsRetweeted ?? false,
+                status.IsFavorited ?? false,
+                retweet.RetweetCount ?? 0,
+                retweet.FavoriteCount ?? 0,
                 new Tweet(
                     status.User.ProfileImageUrl,
                     status.User.Name,
@@ -213,7 +207,8 @@ namespace FavColle.Model
 					status.User.ScreenName,
 					status.Id,
 					status.FullText ?? status.Text,
-					(bool)status.IsRetweeted,
+					status.IsRetweeted ?? false,
+                    status.IsFavorited ?? false,
 					null,
 					status.ExtendedEntities?.Media.Select(media => new TweetImage(media.MediaUrl)));
 				return tweet;
@@ -249,7 +244,11 @@ namespace FavColle.Model
 					status.User.Name,
 					status.User.ScreenName,
 					status.Id,
-					status.FullText ?? status.Text);
+					status.FullText ?? status.Text,
+                    status.IsRetweeted ?? false,
+                    status.IsFavorited ?? false,
+                    status.RetweetCount ?? 0,
+                    status.FavoriteCount ?? 0);
 
 				var entities = status.ExtendedEntities ?? status.Entities;
 				if (entities?.Media == null) return tweet;
@@ -401,9 +400,36 @@ namespace FavColle.Model
 		}
 	}
 
+    /// <summary>
+    /// いいねとリツイートの処理
+    /// </summary>
+    public partial class TwitterClient
+    {
+        public async Task Retweet(long id)
+        {
+            await Tokens.Statuses.RetweetAsync(id: id);
+        }
+
+        public async Task UnRetweet(long id)
+        {
+            await Tokens.Statuses.UnretweetAsync(id: id);
+        }
+
+        public async Task Favorite(long id)
+        {
+            await Tokens.Favorites.CreateAsync(id: id);
+        }
+
+        public async Task UnFavorite(long id)
+        {
+            await Tokens.Favorites.DestroyAsync(id: id);
+        }
+    }
 
 
-
+    /// <summary>
+    /// お気に入り取得機能
+    /// </summary>
 	public partial class TwitterClient
 	{
 		public delegate void FavoritesRetrieve(object sender, FavoritesRetrieveEventArgs e);
