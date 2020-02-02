@@ -18,7 +18,7 @@ namespace FavColle.ViewModel
         /// <summary>1件表示するごとに待機する時間(ms)</summary>
         private const int DELAY = 10;
 
-        public ObservableCollection<TweetContent> Favorites { get; private set; } = new ObservableCollection<TweetContent>();
+        public ObservableCollection<TweetControlViewModel> Favorites { get; private set; } = new ObservableCollection<TweetControlViewModel>();
         
 		public DelegateCommand GetFavoritesCommand { get; set; }
         public ReactiveCommand<ProfileWindow> InitializeCommand { get; private set; }
@@ -75,13 +75,13 @@ namespace FavColle.ViewModel
 				var favorites = await client.GetMyFavorites();
 				var contents = await Task.WhenAll(favorites.Select(async tweet =>
 				{
-					var content = new TweetContent(tweet);
+					var content = new TweetControlViewModel(tweet);
 					return await content.DownloadIconAndMedias();
                 }));
 
                 foreach (var content in contents)
                 {
-                    Dispatch<TweetContent>(Favorites.Add)(content);
+                    Dispatch<TweetControlViewModel>(Favorites.Add)(content);
                     await Task.Delay(DELAY);
                 }
 

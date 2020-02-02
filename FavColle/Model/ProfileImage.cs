@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using FavColle.DIContainer;
 using FavColle.Model.Interface;
 
 namespace FavColle.Model
@@ -34,7 +35,7 @@ namespace FavColle.Model
             {
                 Data = null;
 
-                ILogger logger = Logger.GetLogger();
+                var logger = DI.Resolve<ILogger>();
                 logger.Print("Download Failed.", e);
 
                 return this;

@@ -20,7 +20,7 @@ namespace FavColle.ViewModel
 
         public TwitterClient Client { get; protected set; }
         public string InputBox { get; set; } = string.Empty;
-        public ObservableCollection<TweetContent> TweetList { get; private set; } = new ObservableCollection<TweetContent>();
+        public ObservableCollection<TweetControlViewModel> TweetList { get; private set; } = new ObservableCollection<TweetControlViewModel>();
 
         public DelegateCommand InitializeCommand { get; private set; }
         public DelegateCommand HomeTimelineCommand { get; private set; }
@@ -46,7 +46,7 @@ namespace FavColle.ViewModel
             {
                 throw new InvalidOperationException("Invalid Process Exception");
             }
-
+            DI.Register<ILogger, Logger>();
             Client = DI.Register<TwitterClient>();
             await Client.Initialize();
             await Authorize(window);
@@ -67,7 +67,7 @@ namespace FavColle.ViewModel
 
                 await PopupService.Flash(Application.Current.MainWindow, "タイムライン取得中");
 
-                var tweets = (await Client.FetchHomeTimeline()).Select(tweet => new TweetContent(tweet));
+                var tweets = (await Client.FetchHomeTimeline()).Select(tweet => new TweetControlViewModel(tweet));
 
                 if (tweets.Max(t => t?.Id) == TweetList.Max(t => t?.Id)) return;
 
@@ -112,14 +112,14 @@ namespace FavColle.ViewModel
                 await PopupService.Flash(Application.Current.MainWindow, "タイムライン取得中");
 
                 var maxid = TweetList.Min(tweet => tweet.Id) - 1;
-                var tweets = (await Client.FetchHomeTimeline(maxid: maxid)).Select(tweet => new TweetContent(tweet));
+                var tweets = (await Client.FetchHomeTimeline(maxid: maxid)).Select(tweet => new TweetControlViewModel(tweet));
 
                 var downloaded =
                     await Task.WhenAll(tweets.Select(tweet => tweet.DownloadIconAndMedias()));
 
                 foreach (var content in downloaded)
                 {
-                    Dispatch<TweetContent>(TweetList.Add)(content);
+                    Dispatch<TweetControlViewModel>(TweetList.Add)(content);
                 }
             }
             catch (AggregateException err)
@@ -231,7 +231,7 @@ namespace FavColle.ViewModel
                 }
                 catch (Exception exception)
                 {
-                    ILogger logger = Logger.GetLogger();
+                    var logger = DI.Resolve<ILogger>();
                     logger.Print("認証失敗", exception);
 
                     authed = false;

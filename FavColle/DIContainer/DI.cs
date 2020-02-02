@@ -17,8 +17,15 @@ namespace FavColle.DIContainer
             return Resolve<T>();
         }
 
+        public static T1 Register<T1, T2>() where T2 : class, new()
+        {
+            objects.Add(typeof(T1).Name, new T2());
 
-        public static T Resolve<T>() where T : class, new()
+            return Resolve<T1>();
+        }
+
+
+        public static T Resolve<T>()
         {
             return (T)objects.Where(pair => pair.Key == typeof(T).Name).First().Value;
         }

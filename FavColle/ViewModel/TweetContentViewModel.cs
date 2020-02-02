@@ -12,7 +12,7 @@ using FavColle.Model.Interface;
 
 namespace FavColle.ViewModel
 {
-	public class TweetContent : ViewModelBase
+	public class TweetControlViewModel : ViewModelBase
 	{
 		private ProfileImage IconSource { get; set; }
 		public ImageSource Icon { get; set; }
@@ -44,7 +44,7 @@ namespace FavColle.ViewModel
         public DelegateCommand RetweetCommand { get; set; }
         public DelegateCommand FavoriteCommand { get; set; }
         
-		public TweetContent(Tweet tweet)
+		public TweetControlViewModel(Tweet tweet)
 		{
 			Id = (long)tweet.Id;
 			IconSource = tweet.IconSource;
@@ -63,14 +63,14 @@ namespace FavColle.ViewModel
             FavoriteCommand = new DelegateCommand(Favorite, (obj) => true);
         }
 
-        public async Task<TweetContent> DownloadIconAndMedias()
+        public async Task<TweetControlViewModel> DownloadIconAndMedias()
         {
             await Task.WhenAll(new[] { DownloadIcon(), DownloadMedias() });
             return this;
         }
 
 
-		public async Task<TweetContent> DownloadIcon()
+		public async Task<TweetControlViewModel> DownloadIcon()
 		{
 			if (IconSource.Data == null)
 			{
@@ -92,7 +92,7 @@ namespace FavColle.ViewModel
 		}
 
 
-		public async Task<TweetContent> DownloadMedias()
+		public async Task<TweetControlViewModel> DownloadMedias()
 		{
 			if (MediaSources == null) return this;
 
@@ -120,7 +120,7 @@ namespace FavColle.ViewModel
 		{
 			if (MessageBox.Show("画像を保存しますか？", "画像保存確認", MessageBoxButton.YesNo) == MessageBoxResult.No) return;
 
-			var tweet = obj as TweetContent;
+			var tweet = obj as TweetControlViewModel;
 
 			var directory = Path.Combine("./Favorites/", tweet.ScreenName, tweet.Id.ToString());
 			if (Directory.Exists(directory) == false)

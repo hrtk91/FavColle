@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using FavColle.DIContainer;
 using FavColle.Model;
 using FavColle.Model.Interface;
 
@@ -40,8 +41,8 @@ namespace FavColle.Model
 			{
 				Data = null;
 
-				ILogger logger = Logger.GetLogger();
-				logger.Print("Download Failed.", e);
+				var logger = DI.Resolve<ILogger>();
+                logger.Print("Download Failed.", e);
 
 				return this;
 			}
@@ -75,8 +76,11 @@ namespace FavColle.Model
             }
             catch (AggregateException e)
             {
+                var logger = DI.Resolve<ILogger>();
+                logger.Print("SaveAsAsync", e);
                 foreach (var ie in e.InnerExceptions)
                 {
+                    logger.Print("SaveAsAsync", e);
                     throw ie;
                 }
             }
