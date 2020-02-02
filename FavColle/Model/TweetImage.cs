@@ -9,10 +9,11 @@ using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using FavColle.Model;
+using FavColle.Model.Interface;
 
 namespace FavColle.Model
 {
-	public class TweetImage
+	public class TweetImage : ITwitterImage
 	{
 		public string Url { get; set; }
 		public byte[] Data { get; set; }
@@ -23,13 +24,15 @@ namespace FavColle.Model
 		}
 
 
-		public async Task<TweetImage> Download(SizeOpt size = SizeOpt.Small)
+		public async Task<ITwitterImage> Download(SizeOpt size = SizeOpt.Small)
 		{
 			var client = new CachedWebClient();
 			try
 			{
-                // var imageUrl = $"{Url}{size.Attribute()}";
-                var imageUrl = Url;
+                var ext = Path.GetExtension(Url).Remove(0, 1);
+                var baseName = Path.GetFileNameWithoutExtension(Url).Replace('\\', '/');
+                var directory = Url.Replace(Path.GetFileName(Url), "");
+                var imageUrl = $"{directory}{baseName}?format={ext}&name={size.Attribute()}";
 				Data = await client.DownloadDataAsync(imageUrl);
 				return this;
 			}

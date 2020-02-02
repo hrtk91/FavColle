@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using FavColle.DIContainer;
 using FavColle.Model;
 using FavColle.Service;
+using FavColle.Model.Interface;
 
 namespace FavColle.ViewModel
 {
