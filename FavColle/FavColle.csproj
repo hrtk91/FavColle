@@ -92,6 +92,8 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="DIContainer\DI.cs" />
+    <Compile Include="Model\Interface\ITwitterImage.cs" />
+    <Compile Include="Model\ProfileImage.cs" />
     <Compile Include="Model\SizeOpt.cs" />
     <Compile Include="Service\PopupService.cs" />
     <Compile Include="ViewModel\ReactiveCommand.cs" />
@@ -101,7 +103,7 @@
       <DependentUpon>AuthWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Model\CachedClient.cs" />
-    <Compile Include="Model\ILogger.cs" />
+    <Compile Include="Model\Interface\ILogger.cs" />
     <Compile Include="Model\Logger.cs" />
     <Compile Include="ViewModel\ReactiveProperty.cs" />
     <Compile Include="Model\Tweet.cs" />

@@ -12,6 +12,7 @@ using System.Windows;
 using FavColle;
 using CoreTweet;
 using Newtonsoft.Json;
+using FavColle.Model.Interface;
 
 namespace FavColle.Model
 {
@@ -114,7 +115,7 @@ namespace FavColle.Model
             var result = await Tokens.Users.ShowAsync(user_id => self.Id);
 
             var screenName = result.ScreenName;
-            var image = await new TweetImage(result.ProfileImageUrl).Download();
+            var image = await new ProfileImage(result.ProfileImageUrl).Download();
 
             return (screenName, image.Convert());
         }
@@ -123,7 +124,7 @@ namespace FavColle.Model
 		{
 			var self = await Tokens.Account.VerifyCredentialsAsync();
 			var result = await Tokens.Users.ShowAsync(user_id => self.Id);
-			var image = await new TweetImage(result.ProfileImageUrl).Download();
+			var image = await new ProfileImage(result.ProfileImageUrl).Download();
 			return image.Convert();
 		}
 
@@ -369,23 +370,23 @@ namespace FavColle.Model
 			System.Net.ServicePointManager.DefaultConnectionLimit = 16;
 
 			var imagelist = downloadlist.Select(image => image.Download(SizeOpt.Orig));
-			imagelist.ToList().ForEach(it =>
-			{
+            foreach(var it in imagelist)
+            {
 				it.ContinueWith(task =>
 				{
 					var image = task.Result;
                     var url = image.Url;
 					var data = image.Data;
-					var filename = System.IO.Path.GetFileName(url);
+					var filename = Path.GetFileName(url);
 					var filepath = directory + filename;
 
-					if (System.IO.Directory.Exists(directory) == false)
+					if (Directory.Exists(directory) == false)
 					{
-						System.IO.Directory.CreateDirectory(directory);
+						Directory.CreateDirectory(directory);
 					}
 					if (data != null)
 					{
-						System.IO.File.WriteAllBytes(filepath, data);
+						File.WriteAllBytes(filepath, data);
 						Console.Write("\rDownload Status : {0} Completed.", image.Url);
 					}
 					else
@@ -393,7 +394,7 @@ namespace FavColle.Model
 						Console.Write("\rDownloadStaus : {0} Failed.", image.Url);
 					}
 				});
-            });
+            }
 			
 			Console.WriteLine();
 			Console.WriteLine("Completed.");

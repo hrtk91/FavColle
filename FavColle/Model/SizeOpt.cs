@@ -30,15 +30,15 @@ namespace FavColle.Model
 
     public enum SizeOpt
     {
-        [EnumName(":thumb")]
+        [EnumName("thumb")]
         Thumb,
-        [EnumName(":small")]
+        [EnumName("small")]
         Small,
-        [EnumName(":medium")]
+        [EnumName("medium")]
         Medium,
-        [EnumName(":large")]
+        [EnumName("large")]
         Large,
-        [EnumName(":orig")]
+        [EnumName("orig")]
         Orig
     }
 }

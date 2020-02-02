@@ -5,7 +5,7 @@ namespace FavColle.Model
 {
 	public class Tweet
     {
-		public TweetImage IconSource { get; set; } = null;
+		public ProfileImage IconSource { get; set; } = null;
 		public string Name { get; set; } = null;
 		public string ScreenName { get; set; } = null;
 		public long? Id { get; set; } = null;
@@ -19,7 +19,7 @@ namespace FavColle.Model
         
         public Tweet(string iconUrl, string screenName, long id, string text, IEnumerable<TweetImage> medias = null)
         {
-            IconSource = new TweetImage(iconUrl);
+            IconSource = new ProfileImage(iconUrl);
             ScreenName = screenName;
             Text = text;
             Id = id;
@@ -54,7 +54,7 @@ namespace FavColle.Model
             if (!IsRetweet)
             {
                 IsFavorited = status.IsFavorited ?? false;
-                IconSource = new TweetImage(status.User.ProfileImageUrl);
+                IconSource = new ProfileImage(status.User.ProfileImageUrl);
                 ScreenName = status.User.ScreenName;
                 Text = status.FullText ?? status.Text ?? "";
                 Id = status.Id;
@@ -70,7 +70,7 @@ namespace FavColle.Model
             else
             {
                 IsFavorited = status.RetweetedStatus.IsFavorited ?? false;
-                IconSource = new TweetImage(status.RetweetedStatus.User.ProfileImageUrl);
+                IconSource = new ProfileImage(status.RetweetedStatus.User.ProfileImageUrl);
                 ScreenName = status.RetweetedStatus.User.ScreenName;
                 Text = status.RetweetedStatus.FullText ?? status.RetweetedStatus.Text ?? "";
                 Id = status.Id;
