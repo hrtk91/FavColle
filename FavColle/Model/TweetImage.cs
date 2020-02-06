@@ -24,17 +24,20 @@ namespace FavColle.Model
 			Url = url;
 		}
 
+		public Uri ConvertUri(SizeOpt size = SizeOpt.Small)
+		{
+			var ext = Path.GetExtension(Url).Remove(0, 1);
+			var baseName = Path.GetFileNameWithoutExtension(Url).Replace('\\', '/');
+			var directory = Url.Replace(Path.GetFileName(Url), "");
+			return new Uri($"{directory}{baseName}?format={ext}&name={size.Attribute()}");
+		}
 
 		public async Task<ITwitterImage> Download(SizeOpt size = SizeOpt.Small)
 		{
 			var client = new CachedWebClient();
 			try
 			{
-                var ext = Path.GetExtension(Url).Remove(0, 1);
-                var baseName = Path.GetFileNameWithoutExtension(Url).Replace('\\', '/');
-                var directory = Url.Replace(Path.GetFileName(Url), "");
-                var imageUrl = $"{directory}{baseName}?format={ext}&name={size.Attribute()}";
-				Data = await client.DownloadDataAsync(imageUrl);
+				Data = await client.DownloadDataAsync(ConvertUri(size));
 				return this;
 			}
 			catch (WebException e)

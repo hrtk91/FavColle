@@ -107,6 +107,7 @@
     <Compile Include="Model\Logger.cs" />
     <Compile Include="ViewModel\ReactiveProperty.cs" />
     <Compile Include="Model\Tweet.cs" />
+    <Compile Include="View\Behavior\LazyImageBehavior.cs" />
     <Compile Include="View\Pages\TimelinePage.xaml.cs">
       <DependentUpon>TimelinePage.xaml</DependentUpon>
     </Compile>

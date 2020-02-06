@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -22,7 +23,8 @@ namespace FavColle.ViewModel
 		public string TweetText { get; set; }
 		public IEnumerable<ITwitterImage> MediaSources { get; set; }
 		public ObservableCollection<ImageSource> Medias { get; set; }
-		public int RetweetCount { get; set; }
+        public ObservableCollection<Uri> MediaUris { get; set; }
+        public int RetweetCount { get; set; }
 		public int FavoriteCount { get; set; }
         public string OriginUser { get; set; }
 
@@ -96,23 +98,9 @@ namespace FavColle.ViewModel
 		{
 			if (MediaSources == null) return this;
 
-			MediaSources = await Task.WhenAll(
-				MediaSources.Select(media => media.Download(SizeOpt.Small)));
+            MediaUris = new ObservableCollection<Uri>( MediaSources.Cast<TweetImage>().Select(media => media.ConvertUri()) );
 
-			Medias = new ObservableCollection<ImageSource>(MediaSources.Select(media =>
-			{
-				var bitmapImage = new BitmapImage();
-				using (var ms = new MemoryStream(media.Data))
-				{
-					bitmapImage.BeginInit();
-					bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-					bitmapImage.StreamSource = ms;
-					bitmapImage.EndInit();
-				}
-				return bitmapImage;
-			}));
-
-			return this;
+            return this;
 		}
 
 
