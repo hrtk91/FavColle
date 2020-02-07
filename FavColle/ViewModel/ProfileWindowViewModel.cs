@@ -73,24 +73,17 @@ namespace FavColle.ViewModel
 			{
 				var client = DI.Resolve<TwitterClient>();
 				var favorites = await client.GetMyFavorites();
-				var contents = await Task.WhenAll(favorites.Select(async tweet =>
-				{
-					var content = new TweetControlViewModel(tweet);
-					return await content.DownloadIconAndMedias();
-                }));
+                var contents = favorites.Select(tweet =>
+                {
+                    var content = new TweetControlViewModel(tweet);
+                    return content.SetProfileAndMediaSource();
+                });
 
                 foreach (var content in contents)
                 {
                     Dispatch<TweetControlViewModel>(Favorites.Add)(content);
                     await Task.Delay(DELAY);
                 }
-
-				//Favorites = new ObservableCollection<TweetContent>(contents);
-				//await Task.WhenAll(contents.Select(async content =>
-				//{
-				//	await content.DownloadIcon();
-				//	await content.DownloadMedias();
-				//}));
 			}
 			catch (CoreTweet.TwitterException exception)
 			{

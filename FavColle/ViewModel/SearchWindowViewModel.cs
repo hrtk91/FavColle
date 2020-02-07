@@ -60,17 +60,13 @@ namespace FavColle.ViewModel
 
 			var client = DI.Resolve<TwitterClient>();
 			var tweets = await client.Search(SearchWord);
-			var contents = tweets.Select(tweet => new TweetControlViewModel(tweet)).ToList();
-			contents.ForEach(Dispatch<TweetControlViewModel>(TweetList.Add));
-			var downloaded =
-				await Task.WhenAll(
-					contents.Select(async content =>
-					{
-						await content.DownloadIcon(); await content.DownloadMedias();
-						return content;
-					}));
-			contents.ForEach(content => TweetList.Remove(content));
-			downloaded.ToList().ForEach(Dispatch<TweetControlViewModel>(TweetList.Add));
+			var contents = tweets.Select(tweet => new TweetControlViewModel(tweet));
+			
+			foreach (var content in contents)
+			{
+				content.SetProfileAndMediaSource();
+				Dispatch<TweetControlViewModel>(TweetList.Add)(content);
+			}
 		}
 
 
@@ -90,21 +86,13 @@ namespace FavColle.ViewModel
 				var maxid = TweetList?.Min(tweet => tweet.Id) - 1;
 
 				var tweets = await client.Search(SearchWord, maxid);
-				var contents = tweets.Select(tweet => new TweetControlViewModel(tweet)).ToList();
-				contents.ForEach(Dispatch<TweetControlViewModel>(TweetList.Add));
-				var downloaded =
-					await Task.WhenAll(
-						contents.Select(async content =>
-						{
-							await content.DownloadIcon(); await content.DownloadMedias();
-							return content;
-						}));
-				contents.ForEach(content => TweetList.Remove(content));
-				downloaded.ToList().ForEach(Dispatch<TweetControlViewModel>(TweetList.Add));
-			}
-			catch (Exception)
-			{
+				var contents = tweets.Select(tweet => new TweetControlViewModel(tweet));
 
+				foreach (var content in contents)
+				{
+					content.SetProfileAndMediaSource();
+					Dispatch<TweetControlViewModel>(TweetList.Add)(content);
+				}
 			}
 			finally
 			{

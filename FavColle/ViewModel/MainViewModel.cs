@@ -50,9 +50,11 @@ namespace FavColle.ViewModel
             Client = DI.Register<TwitterClient>();
             await Client.Initialize();
             await Authorize(window);
-			
-            CurrentPage = new View.Pages.TimelinePage();
-            CurrentPage.DataContext = window.DataContext;
+
+            CurrentPage = new View.Pages.TimelinePage
+            {
+                DataContext = window.DataContext
+            };
 
             window.Frame.Navigate(CurrentPage);
         }
@@ -74,11 +76,9 @@ namespace FavColle.ViewModel
                 var excepts = Enumerable.Except(tweets.Select(t => t.Id), TweetList.Select(t => t.Id));
                 var orderedExcepts = tweets.Where(t => excepts.Contains(t.Id)).OrderBy(t => t.Id);
 
-                var downloaded =
-                    await Task.WhenAll(orderedExcepts.Select(tweet => tweet.DownloadIconAndMedias()));
-
-                foreach (var content in downloaded)
+                foreach (var content in orderedExcepts)
                 {
+                    content.SetProfileAndMediaSource();
                     Dispatcher.Invoke(() => TweetList.Insert(0, content));
                 }
             }
@@ -114,11 +114,9 @@ namespace FavColle.ViewModel
                 var maxid = TweetList.Min(tweet => tweet.Id) - 1;
                 var tweets = (await Client.FetchHomeTimeline(maxid: maxid)).Select(tweet => new TweetControlViewModel(tweet));
 
-                var downloaded =
-                    await Task.WhenAll(tweets.Select(tweet => tweet.DownloadIconAndMedias()));
-
-                foreach (var content in downloaded)
+                foreach (var content in tweets)
                 {
+                    content.SetProfileAndMediaSource();
                     Dispatch<TweetControlViewModel>(TweetList.Add)(content);
                 }
             }
@@ -167,14 +165,14 @@ namespace FavColle.ViewModel
             }
         }
 
-		private ImageSource _profileIcon;
-		public ImageSource ProfileIcon
+		private Uri _profileIconSource;
+		public Uri ProfileIconSource
 		{
-            get => _profileIcon;
+            get => _profileIconSource;
 			set
             {
-                _profileIcon = value;
-                RaisePropertyChanged(nameof(ProfileIcon));
+                _profileIconSource = value;
+                RaisePropertyChanged(nameof(ProfileIconSource));
             }
 		}
         
@@ -196,7 +194,7 @@ namespace FavColle.ViewModel
         {
             if (await Client.Authorize())
             {
-                (ScreenName, ProfileIcon) = await Client.GetProfile();
+                (ScreenName, ProfileIconSource) = await Client.FetchProfile();
                 HomeTimelineCommand.Execute(null);
                 return;
             }
@@ -224,7 +222,7 @@ namespace FavColle.ViewModel
                     authWindow.Close();
                     MessageBox.Show("認証に成功しました。", "認証完了");
 
-                    (ScreenName, ProfileIcon) = await Client.GetProfile();
+                    (ScreenName, ProfileIconSource) = await Client.FetchProfile();
                     HomeTimelineCommand.Execute(window);
 
                     return;

@@ -21,6 +21,8 @@ namespace FavColle.Service
                 PlacementTarget = target,
                 Placement = PlacementMode.Center,
                 PopupAnimation = PopupAnimation.Fade,
+                HorizontalOffset = 0,
+                VerticalOffset = 0,
                 IsOpen = true,
             };
             //popup.PlacementRectangle =

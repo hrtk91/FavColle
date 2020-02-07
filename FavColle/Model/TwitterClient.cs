@@ -109,26 +109,13 @@ namespace FavColle.Model
             }
         }
 
-
-        public async Task<(string, ImageSource)> GetProfile()
-        {
-            var self = await Tokens.Account.VerifyCredentialsAsync();
-            var result = await Tokens.Users.ShowAsync(user_id => self.Id);
-
-            var screenName = result.ScreenName;
-            var image = await new ProfileImage(result.ProfileImageUrl).Download();
-
-            return (screenName, image.Convert());
-        }
-
-        public async Task<ImageSource> GetProfileIcon()
+		public async Task<(string, Uri)> FetchProfile()
 		{
 			var self = await Tokens.Account.VerifyCredentialsAsync();
 			var result = await Tokens.Users.ShowAsync(user_id => self.Id);
-			var image = await new ProfileImage(result.ProfileImageUrl).Download();
-			return image.Convert();
-		}
 
+			return (result.ScreenName, new Uri(result.ProfileImageUrl));
+		}
 
 		public async Task<IEnumerable<Tweet>> FetchHomeTimeline(long? sinceid = null, long? maxid = null, int? num = 100)
 		{

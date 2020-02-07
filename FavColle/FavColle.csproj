@@ -128,7 +128,7 @@
     <Compile Include="Model\DelegateCommand.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
     <Compile Include="ViewModel\ProfileWindowViewModel.cs" />
-    <Compile Include="ViewModel\TweetContentViewModel.cs" />
+    <Compile Include="ViewModel\TweetControlViewModel.cs" />
     <Compile Include="ViewModel\ViewModelBase.cs" />
     <Page Include="View\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

@@ -38,7 +38,7 @@
                     <ColumnDefinition Width="15*"/>
                 </Grid.ColumnDefinitions>
                 <Label x:Name="OriginUserName" Content="{Binding Path=OriginUser}" FontSize="14" Grid.Row="0" Grid.Column="3"/>
-                <Image x:Name="Icon" Source="{Binding Path=Icon}" Grid.Row="1" Grid.Column="1" MaxHeight="64" MaxWidth="64"/>
+                <Image x:Name="Icon" b:LazyImageBehavior.LazySource="{Binding Path=IconUri}" Grid.Row="1" Grid.Column="1" MaxHeight="64" MaxWidth="64"/>
                 <Grid Grid.Row="1" Grid.Column="3" HorizontalAlignment="Stretch">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="1*"/>
