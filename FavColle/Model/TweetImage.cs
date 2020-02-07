@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using FavColle.DIContainer;
 using FavColle.Model;
 using FavColle.Model.Interface;
 
@@ -23,25 +24,28 @@ namespace FavColle.Model
 			Url = url;
 		}
 
+		public Uri ConvertUri(SizeOpt size = SizeOpt.Small)
+		{
+			var ext = Path.GetExtension(Url).Remove(0, 1);
+			var baseName = Path.GetFileNameWithoutExtension(Url).Replace('\\', '/');
+			var directory = Url.Replace(Path.GetFileName(Url), "");
+			return new Uri($"{directory}{baseName}?format={ext}&name={size.Attribute()}");
+		}
 
 		public async Task<ITwitterImage> Download(SizeOpt size = SizeOpt.Small)
 		{
 			var client = new CachedWebClient();
 			try
 			{
-                var ext = Path.GetExtension(Url).Remove(0, 1);
-                var baseName = Path.GetFileNameWithoutExtension(Url).Replace('\\', '/');
-                var directory = Url.Replace(Path.GetFileName(Url), "");
-                var imageUrl = $"{directory}{baseName}?format={ext}&name={size.Attribute()}";
-				Data = await client.DownloadDataAsync(imageUrl);
+				Data = await client.DownloadDataAsync(ConvertUri(size));
 				return this;
 			}
 			catch (WebException e)
 			{
 				Data = null;
 
-				ILogger logger = Logger.GetLogger();
-				logger.Print("Download Failed.", e);
+				var logger = DI.Resolve<ILogger>();
+                logger.Print("Download Failed.", e);
 
 				return this;
 			}
@@ -75,8 +79,11 @@ namespace FavColle.Model
             }
             catch (AggregateException e)
             {
+                var logger = DI.Resolve<ILogger>();
+                logger.Print("SaveAsAsync", e);
                 foreach (var ie in e.InnerExceptions)
                 {
+                    logger.Print("SaveAsAsync", e);
                     throw ie;
                 }
             }

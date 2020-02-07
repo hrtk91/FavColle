@@ -30,7 +30,7 @@ namespace FavColle.ViewModel
 		}
 
 
-		public ObservableCollection<TweetContent> TweetList { get; private set; }
+		public ObservableCollection<TweetControlViewModel> TweetList { get; private set; }
 
 
 		public string SearchWord { get; set; }
@@ -41,7 +41,7 @@ namespace FavColle.ViewModel
 		{
 			InitializeCommand = new DelegateCommand(Initialize, (obj) => true);
 			GetPicturesCommand = new DelegateCommand(GetPictures, (obj) => true);
-			TweetList = new ObservableCollection<TweetContent>();
+			TweetList = new ObservableCollection<TweetControlViewModel>();
 		}
 
 
@@ -60,17 +60,13 @@ namespace FavColle.ViewModel
 
 			var client = DI.Resolve<TwitterClient>();
 			var tweets = await client.Search(SearchWord);
-			var contents = tweets.Select(tweet => new TweetContent(tweet)).ToList();
-			contents.ForEach(Dispatch<TweetContent>(TweetList.Add));
-			var downloaded =
-				await Task.WhenAll(
-					contents.Select(async content =>
-					{
-						await content.DownloadIcon(); await content.DownloadMedias();
-						return content;
-					}));
-			contents.ForEach(content => TweetList.Remove(content));
-			downloaded.ToList().ForEach(Dispatch<TweetContent>(TweetList.Add));
+			var contents = tweets.Select(tweet => new TweetControlViewModel(tweet));
+			
+			foreach (var content in contents)
+			{
+				content.SetProfileAndMediaSource();
+				Dispatch<TweetControlViewModel>(TweetList.Add)(content);
+			}
 		}
 
 
@@ -90,21 +86,13 @@ namespace FavColle.ViewModel
 				var maxid = TweetList?.Min(tweet => tweet.Id) - 1;
 
 				var tweets = await client.Search(SearchWord, maxid);
-				var contents = tweets.Select(tweet => new TweetContent(tweet)).ToList();
-				contents.ForEach(Dispatch<TweetContent>(TweetList.Add));
-				var downloaded =
-					await Task.WhenAll(
-						contents.Select(async content =>
-						{
-							await content.DownloadIcon(); await content.DownloadMedias();
-							return content;
-						}));
-				contents.ForEach(content => TweetList.Remove(content));
-				downloaded.ToList().ForEach(Dispatch<TweetContent>(TweetList.Add));
-			}
-			catch (Exception)
-			{
+				var contents = tweets.Select(tweet => new TweetControlViewModel(tweet));
 
+				foreach (var content in contents)
+				{
+					content.SetProfileAndMediaSource();
+					Dispatch<TweetControlViewModel>(TweetList.Add)(content);
+				}
 			}
 			finally
 			{

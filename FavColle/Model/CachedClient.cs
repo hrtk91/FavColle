@@ -8,12 +8,41 @@ using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows.Media.Imaging;
+using FavColle.DIContainer;
+using FavColle.Model.Interface;
 
 namespace FavColle.Model
 {
 	public class CachedWebClient
 	{
         protected static HttpClient client = new HttpClient();
+
+        public static async Task<BitmapImage> LoadImage(Uri uri)
+        {
+            try
+            {
+                var data = await client.GetByteArrayAsync(uri);
+                var image = new BitmapImage();
+                using (var ms = new MemoryStream(data))
+                {
+                    image.BeginInit();
+                    image.StreamSource = ms;
+                    image.CacheOption = BitmapCacheOption.OnLoad;
+                    image.EndInit();
+                    image.Freeze();
+                    return image;
+                }
+            }
+            catch (Exception e)
+            {
+                var logger = DI.Resolve<ILogger>();
+                logger.Print("LoadImage", e);
+            }
+
+            return null;
+        }
+
         public async Task SaveAsAsync(string address, string path)
         {
             using (var stream = await client.GetStreamAsync(address))
@@ -62,6 +91,9 @@ namespace FavColle.Model
                 return await DownloadDataAsync(address, retry--);
             }
 		}
+
+        public async Task<byte[]> DownloadDataAsync(Uri uri) =>
+            await DownloadDataAsync(uri.AbsoluteUri);
 
 
 		protected string ToCacheFileName(string address)

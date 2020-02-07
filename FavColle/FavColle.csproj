@@ -107,6 +107,7 @@
     <Compile Include="Model\Logger.cs" />
     <Compile Include="ViewModel\ReactiveProperty.cs" />
     <Compile Include="Model\Tweet.cs" />
+    <Compile Include="View\Behavior\LazyImageBehavior.cs" />
     <Compile Include="View\Pages\TimelinePage.xaml.cs">
       <DependentUpon>TimelinePage.xaml</DependentUpon>
     </Compile>
@@ -127,7 +128,7 @@
     <Compile Include="Model\DelegateCommand.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
     <Compile Include="ViewModel\ProfileWindowViewModel.cs" />
-    <Compile Include="ViewModel\TweetContentViewModel.cs" />
+    <Compile Include="ViewModel\TweetControlViewModel.cs" />
     <Compile Include="ViewModel\ViewModelBase.cs" />
     <Page Include="View\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

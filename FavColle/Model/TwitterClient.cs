@@ -13,6 +13,7 @@ using FavColle;
 using CoreTweet;
 using Newtonsoft.Json;
 using FavColle.Model.Interface;
+using FavColle.DIContainer;
 
 namespace FavColle.Model
 {
@@ -108,26 +109,13 @@ namespace FavColle.Model
             }
         }
 
-
-        public async Task<(string, ImageSource)> GetProfile()
-        {
-            var self = await Tokens.Account.VerifyCredentialsAsync();
-            var result = await Tokens.Users.ShowAsync(user_id => self.Id);
-
-            var screenName = result.ScreenName;
-            var image = await new ProfileImage(result.ProfileImageUrl).Download();
-
-            return (screenName, image.Convert());
-        }
-
-        public async Task<ImageSource> GetProfileIcon()
+		public async Task<(string, Uri)> FetchProfile()
 		{
 			var self = await Tokens.Account.VerifyCredentialsAsync();
 			var result = await Tokens.Users.ShowAsync(user_id => self.Id);
-			var image = await new ProfileImage(result.ProfileImageUrl).Download();
-			return image.Convert();
-		}
 
+			return (result.ScreenName, new Uri(result.ProfileImageUrl));
+		}
 
 		public async Task<IEnumerable<Tweet>> FetchHomeTimeline(long? sinceid = null, long? maxid = null, int? num = 100)
 		{
@@ -279,7 +267,7 @@ namespace FavColle.Model
 			IEnumerable<Tweet> tweetList = null;
 			try
 			{
-				Console.WriteLine("Search Start : Keyword={0}", keyword);
+				Debug.WriteLine("Search Start : Keyword={0}", keyword);
 
 				var resultList = new List<SearchResult>();
 				var result = await Tokens.Search.TweetsAsync(count => 100, q => keyword);
@@ -323,21 +311,21 @@ namespace FavColle.Model
 			}
 			catch (CoreTweet.TwitterException e)
 			{
-                ILogger logger = Logger.GetLogger();
-                logger.Print("APIの使用回数制限に達したので検索を終了します。", e);
+                var logger = DI.Resolve<ILogger>();
+                logger.Print("SearchImageTweet", e);
 
 				return tweetList;
 			}
 			catch (Exception e)
 			{
-                ILogger logger = Logger.GetLogger();
-                logger.Print("エラーが発生したので検索結果を途中まで返却します。", e);
+                var logger = DI.Resolve<ILogger>();
+                logger.Print("SearchImageTweet", e);
 
 				return null;
 			}
 			finally
 			{
-				Console.WriteLine("Search Complete : Keyword={0}", keyword);
+				Debug.WriteLine("Search Complete : Keyword={0}", keyword);
 			}
 		}
 

@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:FavColle"
         xmlns:v="clr-namespace:FavColle.View"
         xmlns:vm="clr-namespace:FavColle.ViewModel"
+        xmlns:b="clr-namespace:FavColle.View.Behavior"
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity" 
         xmlns:ei="http://schemas.microsoft.com/expression/2010/interactions"
         x:Name="this"
@@ -58,7 +59,7 @@
                 <Button.Template>
                     <ControlTemplate>
                         <StackPanel>
-                            <Image x:Name="ProfileIcon" Source="{Binding Path=ProfileIcon}" MaxHeight="64" MaxWidth="64" Stretch="Uniform"/>
+                            <Image x:Name="ProfileIcon" b:LazyImageBehavior.LazySource="{Binding Path=ProfileIconSource}" MaxHeight="64" MaxWidth="64" Stretch="Uniform"/>
                             <Label Content="{Binding Path=ScreenName}" HorizontalContentAlignment="Center"/>
                         </StackPanel>
                     </ControlTemplate>

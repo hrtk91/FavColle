@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -12,17 +13,19 @@ using FavColle.Model.Interface;
 
 namespace FavColle.ViewModel
 {
-	public class TweetContent : ViewModelBase
+	public class TweetControlViewModel : ViewModelBase
 	{
 		private ProfileImage IconSource { get; set; }
 		public ImageSource Icon { get; set; }
+        public Uri IconUri { get; set; }
 		public long Id { get; set; }
 		public string Name { get; set; }
 		public string ScreenName { get; set; }
 		public string TweetText { get; set; }
 		public IEnumerable<ITwitterImage> MediaSources { get; set; }
 		public ObservableCollection<ImageSource> Medias { get; set; }
-		public int RetweetCount { get; set; }
+        public ObservableCollection<Uri> MediaUris { get; set; }
+        public int RetweetCount { get; set; }
 		public int FavoriteCount { get; set; }
         public string OriginUser { get; set; }
 
@@ -44,7 +47,7 @@ namespace FavColle.ViewModel
         public DelegateCommand RetweetCommand { get; set; }
         public DelegateCommand FavoriteCommand { get; set; }
         
-		public TweetContent(Tweet tweet)
+		public TweetControlViewModel(Tweet tweet)
 		{
 			Id = (long)tweet.Id;
 			IconSource = tweet.IconSource;
@@ -63,56 +66,31 @@ namespace FavColle.ViewModel
             FavoriteCommand = new DelegateCommand(Favorite, (obj) => true);
         }
 
-        public async Task<TweetContent> DownloadIconAndMedias()
+        public TweetControlViewModel SetProfileAndMediaSource()
         {
-            await Task.WhenAll(new[] { DownloadIcon(), DownloadMedias() });
+            SetProfileSource();
+            SetMediaSource();
+
             return this;
         }
 
+        public TweetControlViewModel SetProfileSource()
+        {
+            if (IconSource == null) throw new InvalidOperationException("IconSource doesn't initialized");
 
-		public async Task<TweetContent> DownloadIcon()
+            IconUri = new Uri(IconSource.Url);
+
+            return this;
+        }
+
+        public TweetControlViewModel SetMediaSource()
 		{
-			if (IconSource.Data == null)
-			{
-				await IconSource.Download(SizeOpt.Small);
-			}
+            // 画像は必ずしもあるわけじゃないので、ない場合は何もしない
+            if (MediaSources == null) return this;
 
-			using (var ms = new MemoryStream(IconSource.Data))
-			{
-				var bitmapImage = new BitmapImage();
-				bitmapImage.BeginInit();
-				bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-				bitmapImage.StreamSource = ms;
-				bitmapImage.EndInit();
+            MediaUris = new ObservableCollection<Uri>( MediaSources.Cast<TweetImage>().Select(media => media.ConvertUri()) );
 
-				Icon = bitmapImage;
-			}
-
-			return this;
-		}
-
-
-		public async Task<TweetContent> DownloadMedias()
-		{
-			if (MediaSources == null) return this;
-
-			MediaSources = await Task.WhenAll(
-				MediaSources.Select(media => media.Download(SizeOpt.Small)));
-
-			Medias = new ObservableCollection<ImageSource>(MediaSources.Select(media =>
-			{
-				var bitmapImage = new BitmapImage();
-				using (var ms = new MemoryStream(media.Data))
-				{
-					bitmapImage.BeginInit();
-					bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-					bitmapImage.StreamSource = ms;
-					bitmapImage.EndInit();
-				}
-				return bitmapImage;
-			}));
-
-			return this;
+            return this;
 		}
 
 
@@ -120,7 +98,7 @@ namespace FavColle.ViewModel
 		{
 			if (MessageBox.Show("画像を保存しますか？", "画像保存確認", MessageBoxButton.YesNo) == MessageBoxResult.No) return;
 
-			var tweet = obj as TweetContent;
+			var tweet = obj as TweetControlViewModel;
 
 			var directory = Path.Combine("./Favorites/", tweet.ScreenName, tweet.Id.ToString());
 			if (Directory.Exists(directory) == false)
@@ -177,12 +155,4 @@ namespace FavColle.ViewModel
             }
         }
     }
-
-
-
-
-	public class TweetContentViewModel
-	{
-
-	}
 }
