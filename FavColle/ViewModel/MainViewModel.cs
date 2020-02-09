@@ -26,7 +26,7 @@ namespace FavColle.ViewModel
         public DelegateCommand HomeTimelineCommand { get; private set; }
         public DelegateCommand NextHomeTimelineCommand { get; private set; }
         public DelegateCommand SearchCommand { get; private set; }
-        public DelegateCommand TimelineInitializedCommand { get; private set; }
+        public DelegateCommand ScrollCommand { get; private set; }
 
         protected Page CurrentPage { get; set; }
 
@@ -36,7 +36,7 @@ namespace FavColle.ViewModel
             HomeTimelineCommand = new DelegateCommand(FetchHomeTimeline, (obj) => IsGettingTimeline == false);
             NextHomeTimelineCommand = new DelegateCommand(FetchNextHomeTimeLine, (obj) => TweetList != null && IsGettingTimeline == false);
             SearchCommand = new DelegateCommand(FindTweet);
-            TimelineInitializedCommand = new DelegateCommand(Regist);
+            ScrollCommand = new DelegateCommand(ScrollChanged);
         }
 
         private async void Initialize(object obj)
@@ -248,19 +248,10 @@ namespace FavColle.ViewModel
             }
         }
 
-        private void Regist(object page)
+		private void ScrollChanged(object obj)
         {
-            if (page is View.Pages.TimelinePage current)
-            {
-                var scrollViewer = (VisualTreeHelper.GetChild(current.TweetListBox, 0) as Border)?.Child as ScrollViewer;
-                scrollViewer.ScrollChanged += ScrollChanged;
-            }
-        }
-
-
-		private void ScrollChanged(object sender, ScrollChangedEventArgs e)
-        {
-			if (e.ExtentHeightChange != 0 || e.ExtentWidthChange != 0 || !(sender is ScrollViewer sv)) return;
+            (object sender, ScrollChangedEventArgs e) = (ValueTuple<object, ScrollChangedEventArgs>)obj;
+            if (e.ExtentHeightChange != 0 || e.ExtentWidthChange != 0 || !(sender is ScrollViewer sv)) return;
 
 			var pos = e.VerticalOffset;
             var maxHeight = sv.ScrollableHeight;
