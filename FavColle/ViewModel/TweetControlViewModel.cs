@@ -46,6 +46,7 @@ namespace FavColle.ViewModel
 		public DelegateCommand ImagePushedCommand { get; set; }
         public DelegateCommand RetweetCommand { get; set; }
         public DelegateCommand FavoriteCommand { get; set; }
+        public DelegateCommand ScrollCommand { get; set; }
         
 		public TweetControlViewModel(Tweet tweet)
 		{
@@ -64,6 +65,7 @@ namespace FavColle.ViewModel
 			ImagePushedCommand = new DelegateCommand(ImagePushed, (obj) => true);
             RetweetCommand = new DelegateCommand(Retweet, (obj) => true);
             FavoriteCommand = new DelegateCommand(Favorite, (obj) => true);
+            ScrollCommand = new DelegateCommand(obj => { });
         }
 
         public TweetControlViewModel SetProfileAndMediaSource()

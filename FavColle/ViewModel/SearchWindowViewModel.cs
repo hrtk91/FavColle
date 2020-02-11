@@ -14,20 +14,12 @@ namespace FavColle.ViewModel
 {
 	public class SearchWindowViewModel : ViewModelBase
 	{
-		private DelegateCommand _initializeCommand;
-		public DelegateCommand InitializeCommand
-		{
-			get { return _initializeCommand; }
-			set { _initializeCommand = value; }
-		}
+		public DelegateCommand InitializeCommand { get; set; }
 
 
-		private DelegateCommand _getPicturesCommand;
-		public DelegateCommand GetPicturesCommand
-		{
-			get { return _getPicturesCommand; }
-			set { _getPicturesCommand = value; }
-		}
+		public DelegateCommand GetPicturesCommand { get; set; }
+
+		public DelegateCommand ScrollCommand { get; set; }
 
 
 		public ObservableCollection<TweetControlViewModel> TweetList { get; private set; }
@@ -41,22 +33,14 @@ namespace FavColle.ViewModel
 		{
 			InitializeCommand = new DelegateCommand(Initialize, (obj) => true);
 			GetPicturesCommand = new DelegateCommand(GetPictures, (obj) => true);
+			ScrollCommand = new DelegateCommand(ScrollChanged);
 			TweetList = new ObservableCollection<TweetControlViewModel>();
 		}
 
 
 		public async void Initialize(object obj)
 		{
-			var view = obj as View.SearchWindow;
-
-			if (null == view)
-			{
-				throw new InvalidOperationException("Invalid Process Exception");
-			}
-
-			var scrollViewer = (VisualTreeHelper.GetChild(view.TweetList, 0) as Border)?.Child as ScrollViewer;
-			scrollViewer.ScrollChanged += ScrollChanged;
-
+			if (!(obj is View.SearchWindow view)) throw new InvalidOperationException("Invalid Process Exception");
 
 			var client = DI.Resolve<TwitterClient>();
 			var tweets = await client.Search(SearchWord);
@@ -78,6 +62,8 @@ namespace FavColle.ViewModel
 
 		public async void NextSearchResult(object sender)
 		{
+			if (Searching) return;
+			
 			try
 			{
 				Searching = true;
@@ -101,20 +87,19 @@ namespace FavColle.ViewModel
         }
 
 
-		private void ScrollChanged(object sender, ScrollChangedEventArgs e)
+		private void ScrollChanged(object obj)
 		{
-			if (e.ExtentHeightChange != 0 || e.ExtentWidthChange != 0)
-				return;
+			(object sender, ScrollChangedEventArgs e) = (ValueTuple<object, ScrollChangedEventArgs>)obj;
+			if (e.ExtentHeightChange != 0 || e.ExtentWidthChange != 0 || !(sender is ScrollViewer sv)) return;
 
-			var viewer = sender as ScrollViewer;
 			var pos = e.VerticalOffset;
-			var height = e.ExtentHeight;
-			var rate = pos / height;
+			var maxHeight = sv.ScrollableHeight;
+			var rate = pos / maxHeight;
 			var bottomLine = 0.85;
 			if (rate > bottomLine)
 			{
-				Debug.WriteLine("pos={0}, height={1}, rate={2}", pos, height, rate);
-				if (Searching == false) NextSearchResult(sender);
+				Debug.WriteLine("pos={0}, height={1}, rate={2}", pos, maxHeight, rate);
+				NextSearchResult(sender);
 			}
 		}
 	}
