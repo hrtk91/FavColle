@@ -6,6 +6,7 @@
         xmlns:v="clr-namespace:FavColle.View"
         xmlns:local="clr-namespace:FavColle"
         xmlns:vm="clr-namespace:FavColle.ViewModel"
+        xmlns:b="clr-namespace:FavColle.View.Behavior"
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         mc:Ignorable="d"
         Title="SearchWindow" Height="600" Width="300" Name="self">
@@ -37,7 +38,11 @@
             <RowDefinition Height="5*"/>
         </Grid.RowDefinitions>
         <Button Content="検索結果一括取得" Command="{Binding Path=GetPicturesCommand}" Grid.Row="0"/>
-        <ListBox Name="TweetList" ItemsSource="{Binding Path=TweetList}"  ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.CanContentScroll="False" Grid.Row="1">
+        <ListBox Name="TweetList"
+                 ItemsSource="{Binding Path=TweetList}" 
+                 b:ScrollBehavior.ScrollCommand="{Binding ScrollCommand}"
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                 ScrollViewer.CanContentScroll="False" Grid.Row="1">
             <ListBox.ItemsPanel>
                 <ItemsPanelTemplate>
                     <StackPanel/>

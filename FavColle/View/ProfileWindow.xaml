@@ -7,6 +7,7 @@
         xmlns:local="clr-namespace:FavColle"
         xmlns:v="clr-namespace:FavColle.View"
         xmlns:vm="clr-namespace:FavColle.ViewModel"
+        xmlns:b="clr-namespace:FavColle.View.Behavior"
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity" 
         xmlns:ei="http://schemas.microsoft.com/expression/2010/interactions"
         mc:Ignorable="d"
@@ -39,7 +40,11 @@
             <RowDefinition Height="0.5*"/>
         </Grid.RowDefinitions>
         <Button Content="お気に入り一括取得" Command="{Binding Path=GetFavoritesCommand}" Grid.Row="0"/>
-        <ListBox ItemsSource="{Binding Path=Favorites}"  ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.CanContentScroll="False" Grid.Row="1">
+        <ListBox
+            ItemsSource="{Binding Path=Favorites}"
+            b:ScrollBehavior.ScrollCommand="{Binding ScrollCommand}"
+            ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+            ScrollViewer.CanContentScroll="False" Grid.Row="1">
             <ListBox.ItemsPanel>
                 <ItemsPanelTemplate>
                     <StackPanel Orientation="Vertical"/>

@@ -5,17 +5,17 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity" 
       xmlns:v="clr-namespace:FavColle.View"
+      xmlns:b="clr-namespace:FavColle.View.Behavior"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="TimelinePage"
       x:Name="this">
-    <i:Interaction.Triggers>
-        <i:EventTrigger EventName="Loaded">
-            <i:InvokeCommandAction Command="{Binding Path=TimelineInitializedCommand}" CommandParameter="{Binding ElementName=this}"/>
-        </i:EventTrigger>
-    </i:Interaction.Triggers>
     <Grid>
-        <ListBox x:Name="TweetListBox" ItemsSource="{Binding Path=TweetList}" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.CanContentScroll="False">
+        <ListBox x:Name="TweetListBox"
+                 ItemsSource="{Binding Path=TweetList}"
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                 ScrollViewer.CanContentScroll="False"
+                 b:ScrollBehavior.ScrollCommand="{Binding TimelineInitializedCommand}">
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <v:TweetControl/>
