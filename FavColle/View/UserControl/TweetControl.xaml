@@ -21,15 +21,15 @@
     <Border BorderBrush="LightGray" BorderThickness="0 0 0 1" Padding="5 0 0 5" Height="auto">
         <Grid Background="White">
             <Grid.RowDefinitions>
-                <RowDefinition Height="0.5*"/>
-                <RowDefinition Height="0.5*"/>
-                <RowDefinition Height="0.2*"/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition Height="40"/>
             </Grid.RowDefinitions>
             <Grid Grid.Row="0">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="1*"/>
-                    <RowDefinition Height="5*"/>
-                    <RowDefinition Height="1*"/>
+                    <RowDefinition MinHeight="5"/>
+                    <RowDefinition/>
+                    <RowDefinition/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1*" MaxWidth="10"/>
@@ -37,18 +37,29 @@
                     <ColumnDefinition Width="1*" MaxWidth="10"/>
                     <ColumnDefinition Width="15*"/>
                 </Grid.ColumnDefinitions>
-                <Label x:Name="OriginUserName" Content="{Binding Path=OriginUser}" FontSize="14" Grid.Row="0" Grid.Column="3"/>
-                <Image x:Name="Icon" b:LazyImageBehavior.LazySource="{Binding Path=IconUri}" Grid.Row="1" Grid.Column="1" MaxHeight="64" MaxWidth="64"/>
+                <Label x:Name="OriginUserName" Content="{Binding Path=OriginUser}" FontSize="10" Grid.Row="0" Grid.Column="3">
+                    <Label.Style>
+                        <Style TargetType="Label">
+                            <Style.Triggers>
+                                <Trigger Property="Content" Value="">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Label.Style>
+                </Label>
+                <Image x:Name="Icon" b:LazyImageBehavior.LazySource="{Binding Path=IconUri}" Grid.Row="1" Grid.Column="1" MaxHeight="64" MaxWidth="64" VerticalAlignment="Top"/>
                 <Grid Grid.Row="1" Grid.Column="3" HorizontalAlignment="Stretch">
                     <Grid.RowDefinitions>
+                        <RowDefinition MinHeight="0"/>
                         <RowDefinition Height="1*"/>
                         <RowDefinition Height="3*"/>
                     </Grid.RowDefinitions>
-                    <StackPanel Orientation="Horizontal" Grid.Row="0">
+                    <StackPanel Orientation="Horizontal" Grid.Row="1">
                         <Label x:Name="UserName" Content="{Binding Path=Name}" FontWeight="Bold" FontSize="20"/>
                         <Label x:Name="ScreenName" Content="{Binding Path=ScreenName}" FontSize="16"/>
                     </StackPanel>
-                    <TextBlock x:Name="TweetText" Text="{Binding Path=TweetText}" FontSize="16" TextWrapping="Wrap" Grid.Row="1"/>
+                    <TextBlock x:Name="TweetText" Text="{Binding Path=TweetText}" FontSize="16" TextWrapping="Wrap" Grid.Row="2"/>
                 </Grid>
             </Grid>
             <Grid Grid.Row="1">
@@ -86,7 +97,7 @@
                 </ListBox>
             </Grid>
             <Grid Grid.Row="2">
-                <StackPanel Orientation="Horizontal">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <Button Name="Retweet" Content="Retweet"
                         Command="{Binding Path=RetweetCommand}"
                         CommandParameter="{Binding ElementName=this}">
