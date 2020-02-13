@@ -48,19 +48,19 @@ namespace FavColle.ViewModel
         public DelegateCommand FavoriteCommand { get; set; }
         public DelegateCommand ScrollCommand { get; set; }
         
-		public TweetControlViewModel(Tweet tweet)
+		public TweetControlViewModel(ITweet tweet)
 		{
-			Id = (long)tweet.Id;
-			IconSource = tweet.IconSource;
-			Name = tweet.Name;
-			ScreenName = tweet.ScreenName;
+			Id = tweet.Id;
+			IconSource = tweet.User.IconSource;
+			Name = tweet.User.Name;
+			ScreenName = tweet.User.ScreenName;
 			TweetText = tweet.Text;
 			MediaSources = tweet.Medias;
-            IsRetweeted = tweet.IsRetweet;
+            IsRetweeted = tweet.IsRetweetByUser;
             IsFavorited = tweet.IsFavorited;
-			RetweetCount = tweet.RetweetCount ?? 0;
-			FavoriteCount = tweet.FavoriteCount ?? 0;
-            OriginUser = tweet.IsRetweet ? $"{tweet.OriginUser.ScreenName}がリツイート" : "";
+			RetweetCount = tweet.RetweetCount;
+			FavoriteCount = tweet.FavoriteCount;
+            OriginUser = tweet.OriginUser != null ? $"{tweet.OriginUser.ScreenName}がリツイート" : "";
 
 			ImagePushedCommand = new DelegateCommand(ImagePushed, (obj) => true);
             RetweetCommand = new DelegateCommand(Retweet, (obj) => true);

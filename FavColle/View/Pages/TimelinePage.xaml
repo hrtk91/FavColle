@@ -15,7 +15,7 @@
                  ItemsSource="{Binding Path=TweetList}"
                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                  ScrollViewer.CanContentScroll="False"
-                 b:ScrollBehavior.ScrollCommand="{Binding TimelineInitializedCommand}">
+                 b:ScrollBehavior.ScrollCommand="{Binding ScrollCommand}">
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <v:TweetControl/>
