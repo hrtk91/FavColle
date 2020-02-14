@@ -63,7 +63,8 @@ namespace FavColle.Model
                 ScreenName = status.User.ScreenName,
                 IconSource = new ProfileImage(status.User.ProfileImageUrl),
             };
-            Text = status.FullText ?? status.Text ?? "";
+            
+            Text = status?.ExtendedTweet?.FullText != null ? status.ExtendedTweet.FullText : status.FullText ?? status.Text ?? "";
             Medias =
                 status?.ExtendedEntities?.Media
                 ?.Where(media => media.Type == "photo")
@@ -98,7 +99,7 @@ namespace FavColle.Model
                 ScreenName = status.RetweetedStatus.User.ScreenName,
                 Name = status.RetweetedStatus.User.Name,
             };
-            Text = status.RetweetedStatus.FullText ?? status.RetweetedStatus.Text ?? "";
+            Text = status?.ExtendedTweet?.FullText != null ? status.ExtendedTweet.FullText : status.FullText ?? status.Text ?? "";
             Medias =
                 status?.RetweetedStatus?.ExtendedEntities?.Media?
                 .Where(media => media.Type == "photo")
