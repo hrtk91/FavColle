@@ -1,0 +1,47 @@
+﻿<Canvas x:Class="FavColle.View.MediaViewer"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:v="clr-namespace:FavColle.View"
+             xmlns:b="clr-namespace:FavColle.View.Behavior"
+             mc:Ignorable="d"
+             d:DesignHeight="300" d:DesignWidth="500"
+             Background="Transparent"
+             HorizontalAlignment="Stretch"
+             VerticalAlignment="Stretch">
+    <Grid
+        Width="{Binding Path=Width, RelativeSource={RelativeSource AncestorType={x:Type v:MediaViewer}}}"
+        Height="{Binding Path=Height, RelativeSource={RelativeSource AncestorType={x:Type v:MediaViewer}}}"
+        HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+        Canvas.Top="0" Canvas.Left="0">
+        <Grid.Resources>
+            <ResourceDictionary Source="../Resource\CircleButton.xaml"/>
+        </Grid.Resources>
+        <Grid.Background>
+            <SolidColorBrush Color="Gray" Opacity="0.5"/>
+        </Grid.Background>
+        <Button Content="←" HorizontalAlignment="Left" VerticalAlignment="Center"
+                Style="{StaticResource CircleButton}"
+                Width="30" Height="30"
+                Background="WhiteSmoke"
+                Command="{Binding Path=PreviousCommand}"
+                Panel.ZIndex="{Binding Path=ZIndex, RelativeSource={RelativeSource AncestorType={x:Type Canvas}}}"/>
+        <Button Command="{Binding MediaPushedCommand}" CommandParameter="{Binding Selected}" 
+                Height="auto" Width="auto">
+            <Button.Template>
+                <ControlTemplate>
+                    <Image b:LazyImageBehavior.LazySource="{Binding Path=Selected, UpdateSourceTrigger=PropertyChanged}"
+                        Stretch="Uniform"/>
+                </ControlTemplate>
+            </Button.Template>
+        </Button>
+        <Button Content="→" HorizontalAlignment="Right" VerticalAlignment="Center"
+                Style="{StaticResource CircleButton}"
+                Width="30" Height="30"
+                Background="WhiteSmoke"
+                Command="{Binding Path=NextCommand}"
+                Panel.ZIndex="{Binding Path=ZIndex, RelativeSource={RelativeSource AncestorType={x:Type Canvas}}}">
+        </Button>
+    </Grid>
+</Canvas>

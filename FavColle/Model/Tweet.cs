@@ -99,7 +99,9 @@ namespace FavColle.Model
                 ScreenName = status.RetweetedStatus.User.ScreenName,
                 Name = status.RetweetedStatus.User.Name,
             };
-            Text = status?.ExtendedTweet?.FullText != null ? status.ExtendedTweet.FullText : status.FullText ?? status.Text ?? "";
+            Text = status.RetweetedStatus.ExtendedTweet?.FullText != null ?
+                status.RetweetedStatus.ExtendedTweet?.FullText :
+                status.RetweetedStatus.FullText ?? status.RetweetedStatus.Text ?? "";
             Medias =
                 status?.RetweetedStatus?.ExtendedEntities?.Media?
                 .Where(media => media.Type == "photo")

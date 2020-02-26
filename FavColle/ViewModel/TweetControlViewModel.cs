@@ -23,8 +23,8 @@ namespace FavColle.ViewModel
 		public string ScreenName { get; set; }
 		public string TweetText { get; set; }
 		public IEnumerable<ITwitterImage> MediaSources { get; set; }
-		public ObservableCollection<ImageSource> Medias { get; set; }
         public ObservableCollection<Uri> MediaUris { get; set; }
+        public Uri Showing { get; set; }
         public int RetweetCount { get; set; }
 		public int FavoriteCount { get; set; }
         public string OriginUser { get; set; }
@@ -43,7 +43,7 @@ namespace FavColle.ViewModel
             set { _isFavorited = value; RaisePropertyChanged(); }
         }
         
-		public DelegateCommand ImagePushedCommand { get; set; }
+		public DelegateCommand MediaPushedCommand { get; set; }
         public DelegateCommand RetweetCommand { get; set; }
         public DelegateCommand FavoriteCommand { get; set; }
         public DelegateCommand ScrollCommand { get; set; }
@@ -62,7 +62,7 @@ namespace FavColle.ViewModel
 			FavoriteCount = tweet.FavoriteCount;
             OriginUser = tweet.OriginUser != null ? $"{tweet.OriginUser.ScreenName}がリツイート" : "";
 
-			ImagePushedCommand = new DelegateCommand(ImagePushed, (obj) => true);
+			MediaPushedCommand = new DelegateCommand(MediaPushed, (obj) => true);
             RetweetCommand = new DelegateCommand(Retweet, (obj) => true);
             FavoriteCommand = new DelegateCommand(Favorite, (obj) => true);
             ScrollCommand = new DelegateCommand(obj => { });
@@ -96,27 +96,11 @@ namespace FavColle.ViewModel
 		}
 
 
-		public void ImagePushed(object obj)
+		public void MediaPushed(object obj)
 		{
-			if (MessageBox.Show("画像を保存しますか？", "画像保存確認", MessageBoxButton.YesNo) == MessageBoxResult.No) return;
+            if (!(obj is Uri content)) return;
 
-			var tweet = obj as TweetControlViewModel;
-
-			var directory = Path.Combine("./Favorites/", tweet.ScreenName, tweet.Id.ToString());
-			if (Directory.Exists(directory) == false)
-			{
-				Directory.CreateDirectory(directory);
-			}
-
-			tweet.MediaSources.ToList().ForEach(async image =>
-			{
-				var filename = Path.GetFileName(image.Url);
-				var filepath = directory + filename;
-
-				if (File.Exists(filepath) == true) return;
-
-				await image.SaveAsAsync(directory, filename);
-			});
+            Service.MediaViewerService.Insert(new MediaOverlayViewModel(content, MediaUris, Id));
 		}
 
         public async void Retweet(object obj)

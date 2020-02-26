@@ -18,9 +18,9 @@ namespace FavColle.View
     /// <summary>
     /// ImageViewer.xaml の相互作用ロジック
     /// </summary>
-    public partial class ImageViewer : UserControl
+    public partial class MediaViewer : Canvas
     {
-        public ImageViewer()
+        public MediaViewer()
         {
             InitializeComponent();
         }
