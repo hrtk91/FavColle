@@ -1,45 +1,45 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using FavColle.Model.Interface;
 
 namespace FavColle.Model
 {
     class MediaViewState
     {
-        protected int TweetId { get; set; }
-        protected Uri Selected { get; set; }
-        protected IList<Uri> MediaUris { get; set; }
+        public ITwitterImage Selected { get; protected set; }
+        protected IList<ITwitterImage> Medias { get; set; }
 
-        public MediaViewState(Uri selected, IEnumerable<Uri> mediaUris)
+        public MediaViewState(ITwitterImage selected, IEnumerable<ITwitterImage> mediaUris)
         {
-            Selected = selected;
-            MediaUris = mediaUris.ToList();
+            Medias = mediaUris.ToList();
+            Selected = Medias.First(m => m.Url == selected.Url);
         }
 
         public bool HasPrevious()
-            => !(MediaUris.First() == Selected);
+            => !(Medias.First() == Selected);
         public bool HasNext()
-            => !(MediaUris.Last() == Selected);
+            => !(Medias.Last() == Selected);
 
-        public Uri Previous()
+        public ITwitterImage Previous()
         {
-            var idx = MediaUris.IndexOf(Selected);
+            var idx = Medias.IndexOf(Selected);
             if (idx < 1) throw new InvalidOperationException();
 
             var prevIdx = idx;
 
-            Selected = MediaUris.Take(prevIdx).Last();
+            Selected = Medias.Take(prevIdx).Last();
             return Selected;
         }
 
-        public Uri Next()
+        public ITwitterImage Next()
         {
-            var idx = MediaUris.IndexOf(Selected);
+            var idx = Medias.IndexOf(Selected);
             if (idx == -1) throw new InvalidOperationException();
 
             var nextIdx = idx + 2;
 
-            Selected = MediaUris.Take(nextIdx).Last();
+            Selected = Medias.Take(nextIdx).Last();
             return Selected;
         }
     }

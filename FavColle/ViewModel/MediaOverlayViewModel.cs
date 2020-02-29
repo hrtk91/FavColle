@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+using System.Windows.Controls;
 using FavColle.Model;
+using FavColle.Model.Interface;
+using Microsoft.Win32;
 
 namespace FavColle.ViewModel
 {
     class MediaOverlayViewModel : ViewModelBase
     {
-        private long TweetId;
+        private ITweet Tweet;
         private Uri _selected;
         public Uri Selected
         {
@@ -24,24 +23,26 @@ namespace FavColle.ViewModel
         public DelegateCommand PreviousCommand { get; set; }
         public DelegateCommand NextCommand { get; set; }
         public DelegateCommand MediaPushedCommand { get; set; }
+        public DelegateCommand CloseCommand { get; set; }
 
-        public MediaOverlayViewModel(Uri selected, IEnumerable<Uri> medias, long tweetId)
+        public MediaOverlayViewModel(ITwitterImage selected, IEnumerable<ITwitterImage> medias, ITweet tweet)
         {
-            TweetId = tweetId;
-            Selected = selected;
-
+            Tweet = tweet;
             State = new MediaViewState(selected, medias);
+
+            Selected = State.Selected.ToUri(SizeOpt.Orig);
 
             PreviousCommand = new DelegateCommand(Previous);
             NextCommand = new DelegateCommand(Next);
             MediaPushedCommand = new DelegateCommand(MediaPushed);
+            CloseCommand = new DelegateCommand(Close);
         }
 
         public void Previous(object obj)
         {
             if (State.HasPrevious())
             {
-                Selected = State.Previous();
+                Selected = State.Previous().ToUri(SizeOpt.Orig);
             }
         }
 
@@ -49,27 +50,30 @@ namespace FavColle.ViewModel
         {
             if (State.HasNext())
             {
-                Selected = State.Next();
+                Selected = State.Next().ToUri(SizeOpt.Orig);
             }
         }
 
         public async void MediaPushed(object obj)
         {
-            if (MessageBox.Show("画像を保存しますか？", "画像保存確認", MessageBoxButton.YesNo) == MessageBoxResult.No) return;
-            MessageBox.Show("未対応");
-            return;
+            var filename = Path.GetFileName(State.Selected.Url);
 
-            var directory = Path.Combine("./Favorites/", TweetId.ToString());
-            if (Directory.Exists(directory) == false)
-            {
-                Directory.CreateDirectory(directory);
-            }
-            var filename = Path.Combine(Selected.Segments.Last(), Selected.Query.Substring(1).Split('&').Last());
-            var filepath = Path.Combine(directory, filename);
+            var dialog = new SaveFileDialog();
+            dialog.InitialDirectory = Path.GetFullPath(".\\");
+            dialog.FileName = $"{Tweet.User.Name}_{filename}";
+            dialog.Filter = "*.jpg|JPG,*.jpeg|JPEG,*.png|PNG";
 
-            if (File.Exists(filepath) == true) return;
+            if (dialog.ShowDialog() == false) return;
+            
+            await State.Selected.SaveAsAsync(Selected, dialog.FileName);
+        }
 
-            await (new TweetImage(Selected.AbsoluteUri)).SaveAsAsync(directory, filename);
+        public void Close(object obj)
+        {
+            if (!(obj is Canvas viewer)) return;
+            if (!(viewer.Parent is Panel panel)) return;
+            
+            panel.Children.Remove(viewer);
         }
     }
 }

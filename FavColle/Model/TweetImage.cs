@@ -24,7 +24,7 @@ namespace FavColle.Model
 			Url = url;
 		}
 
-		public Uri ConvertUri(SizeOpt size = SizeOpt.Small)
+		public Uri ToUri(SizeOpt size = SizeOpt.Small)
 		{
 			var ext = Path.GetExtension(Url).Remove(0, 1);
 			var baseName = Path.GetFileNameWithoutExtension(Url).Replace('\\', '/');
@@ -37,7 +37,7 @@ namespace FavColle.Model
 			var client = new CachedWebClient();
 			try
 			{
-				Data = await client.DownloadDataAsync(ConvertUri(size));
+				Data = await client.DownloadDataAsync(ToUri(size));
 				return this;
 			}
 			catch (WebException e)
@@ -67,15 +67,12 @@ namespace FavColle.Model
 			return bitmapImage;
 		}
 
-        public async Task SaveAsAsync(string directory, string filename)
+        public async Task SaveAsAsync(Uri source, string filepath)
         {
-            var filepath = directory + filename;
-            if (File.Exists(filepath) == true) return;
-
             try
             {
                 var client = new CachedWebClient();
-                await client.SaveAsAsync(Url, filepath);
+                await client.SaveAsAsync(source.AbsoluteUri, filepath);
             }
             catch (AggregateException e)
             {

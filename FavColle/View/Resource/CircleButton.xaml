@@ -6,6 +6,11 @@
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="BorderThickness" Value="5"/>
                 <Setter Property="BorderBrush" Value="LightBlue"/>
+                <Setter Property="Background">
+                    <Setter.Value>
+                        <SolidColorBrush Color="WhiteSmoke" Opacity=".8"/>
+                    </Setter.Value>
+                </Setter>
             </Trigger>
         </Style.Triggers>
         <Setter Property="Template">
@@ -29,5 +34,11 @@
         </Setter>
         <Setter Property="HorizontalContentAlignment" Value="Center"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Background">
+            <Setter.Value>
+                <SolidColorBrush Color="WhiteSmoke" Opacity=".3"/>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="BorderBrush" Value="Transparent"/>
     </Style>
 </ResourceDictionary>

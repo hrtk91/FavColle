@@ -47,9 +47,12 @@ namespace FavColle.ViewModel
         public DelegateCommand RetweetCommand { get; set; }
         public DelegateCommand FavoriteCommand { get; set; }
         public DelegateCommand ScrollCommand { get; set; }
+
+        private ITweet OriginTweet { get; set; }
         
 		public TweetControlViewModel(ITweet tweet)
 		{
+            OriginTweet = tweet;
 			Id = tweet.Id;
 			IconSource = tweet.User.IconSource;
 			Name = tweet.User.Name;
@@ -90,7 +93,7 @@ namespace FavColle.ViewModel
             // 画像は必ずしもあるわけじゃないので、ない場合は何もしない
             if (MediaSources == null) return this;
 
-            MediaUris = new ObservableCollection<Uri>( MediaSources.Cast<TweetImage>().Select(media => media.ConvertUri()) );
+            MediaUris = new ObservableCollection<Uri>( MediaSources.Cast<TweetImage>().Select(media => media.ToUri()) );
 
             return this;
 		}
@@ -100,7 +103,8 @@ namespace FavColle.ViewModel
 		{
             if (!(obj is Uri content)) return;
 
-            Service.MediaViewerService.Insert(new MediaOverlayViewModel(content, MediaUris, Id));
+            var tweetImage = MediaSources.First(media => media.ToUri().AbsoluteUri == content.AbsoluteUri);
+            Service.MediaViewerService.Insert(new MediaOverlayViewModel(tweetImage, MediaSources, OriginTweet));
 		}
 
         public async void Retweet(object obj)
@@ -109,15 +113,35 @@ namespace FavColle.ViewModel
 
             var client = DI.Resolve<TwitterClient>();
 
-            if (!IsRetweeted)
+            try
             {
-                IsRetweeted = true;
-                await client.Retweet(Id);
+                if (!IsRetweeted)
+                {
+                    IsRetweeted = true;
+                    await client.Retweet(Id);
+                    RetweetCount++;
+                }
+                else
+                {
+                    IsRetweeted = false;
+                    await client.UnRetweet(Id);
+                    RetweetCount--;
+                }
             }
-            else
+            catch (AggregateException aggregate)
             {
-                IsRetweeted = false;
-                await client.UnRetweet(Id);
+                foreach (var e in aggregate.InnerExceptions)
+                {
+                    if (e is CoreTweet.TwitterException)
+                    {
+                        // 以下のケースはどうしようもないから無視
+                        // ・リツイート済をリツイート
+                        // ・リツイート未をリツイート外す
+                        // ・リツイート失敗
+                        continue;
+                    }
+                    throw e;
+                }
             }
         }
 
@@ -127,17 +151,33 @@ namespace FavColle.ViewModel
 
             var client = DI.Resolve<TwitterClient>();
 
-            if (!IsFavorited)
+            try
             {
-                IsFavorited = true;
-                FavoriteCount++;
-                await client.Favorite(Id);
+                if (!IsFavorited)
+                {
+                    IsFavorited = true;
+                    FavoriteCount++;
+                    await client.Favorite(Id);
+                }
+                else
+                {
+                    IsFavorited = false;
+                    FavoriteCount--;
+                    await client.UnFavorite(Id);
+                }
             }
-            else
+            catch (AggregateException aggregate)
             {
-                IsFavorited = false;
-                FavoriteCount--;
-                await client.UnFavorite(Id);
+                foreach (var e in aggregate.InnerExceptions)
+                {
+                    if (e is CoreTweet.TwitterException)
+                    {
+                        // 以下のケースはどうしようもないから無視
+                        // ・ふぁぼ済をふぁぼった
+                        // ・ふぁぼったをふぁぼらないにした
+                        // ・ふぁぼ失敗
+                    }
+                }
             }
         }
     }
