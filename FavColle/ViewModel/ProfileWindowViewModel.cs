@@ -114,15 +114,17 @@ namespace FavColle.ViewModel
 
                 foreach (var media in medias)
                 {
+                    var directory = ".\\Favorites\\";
                     var filename = Path.GetFileName(media.Url);
-                    var directory = "./Favorites/";
 
                     if (!Directory.Exists(directory))
                         Directory.CreateDirectory(directory);
 
+                    var filepath = Path.Combine(directory, filename);
+
                     try
                     {
-                        await media.SaveAsAsync(directory, filename);
+                        await media.SaveAsAsync(media.ToUri(SizeOpt.Orig), filepath);
                     }
                     catch (AggregateException err)
                     {

@@ -23,8 +23,8 @@ namespace FavColle.ViewModel
 		public string ScreenName { get; set; }
 		public string TweetText { get; set; }
 		public IEnumerable<ITwitterImage> MediaSources { get; set; }
-		public ObservableCollection<ImageSource> Medias { get; set; }
         public ObservableCollection<Uri> MediaUris { get; set; }
+        public Uri Showing { get; set; }
         public int RetweetCount { get; set; }
 		public int FavoriteCount { get; set; }
         public string OriginUser { get; set; }
@@ -43,26 +43,29 @@ namespace FavColle.ViewModel
             set { _isFavorited = value; RaisePropertyChanged(); }
         }
         
-		public DelegateCommand ImagePushedCommand { get; set; }
+		public DelegateCommand MediaPushedCommand { get; set; }
         public DelegateCommand RetweetCommand { get; set; }
         public DelegateCommand FavoriteCommand { get; set; }
         public DelegateCommand ScrollCommand { get; set; }
+
+        private ITweet OriginTweet { get; set; }
         
-		public TweetControlViewModel(Tweet tweet)
+		public TweetControlViewModel(ITweet tweet)
 		{
-			Id = (long)tweet.Id;
-			IconSource = tweet.IconSource;
-			Name = tweet.Name;
-			ScreenName = tweet.ScreenName;
+            OriginTweet = tweet;
+			Id = tweet.Id;
+			IconSource = tweet.User.IconSource;
+			Name = tweet.User.Name;
+			ScreenName = tweet.User.ScreenName;
 			TweetText = tweet.Text;
 			MediaSources = tweet.Medias;
-            IsRetweeted = tweet.IsRetweet;
+            IsRetweeted = tweet.IsRetweetByUser;
             IsFavorited = tweet.IsFavorited;
-			RetweetCount = tweet.RetweetCount ?? 0;
-			FavoriteCount = tweet.FavoriteCount ?? 0;
-            OriginUser = tweet.IsRetweet ? $"{tweet.OriginUser.ScreenName}がリツイート" : "";
+			RetweetCount = tweet.RetweetCount;
+			FavoriteCount = tweet.FavoriteCount;
+            OriginUser = tweet.OriginUser != null ? $"{tweet.OriginUser.ScreenName}がリツイート" : "";
 
-			ImagePushedCommand = new DelegateCommand(ImagePushed, (obj) => true);
+			MediaPushedCommand = new DelegateCommand(MediaPushed, (obj) => true);
             RetweetCommand = new DelegateCommand(Retweet, (obj) => true);
             FavoriteCommand = new DelegateCommand(Favorite, (obj) => true);
             ScrollCommand = new DelegateCommand(obj => { });
@@ -90,33 +93,18 @@ namespace FavColle.ViewModel
             // 画像は必ずしもあるわけじゃないので、ない場合は何もしない
             if (MediaSources == null) return this;
 
-            MediaUris = new ObservableCollection<Uri>( MediaSources.Cast<TweetImage>().Select(media => media.ConvertUri()) );
+            MediaUris = new ObservableCollection<Uri>( MediaSources.Cast<TweetImage>().Select(media => media.ToUri()) );
 
             return this;
 		}
 
 
-		public void ImagePushed(object obj)
+		public void MediaPushed(object obj)
 		{
-			if (MessageBox.Show("画像を保存しますか？", "画像保存確認", MessageBoxButton.YesNo) == MessageBoxResult.No) return;
+            if (!(obj is Uri content)) return;
 
-			var tweet = obj as TweetControlViewModel;
-
-			var directory = Path.Combine("./Favorites/", tweet.ScreenName, tweet.Id.ToString());
-			if (Directory.Exists(directory) == false)
-			{
-				Directory.CreateDirectory(directory);
-			}
-
-			tweet.MediaSources.ToList().ForEach(async image =>
-			{
-				var filename = Path.GetFileName(image.Url);
-				var filepath = directory + filename;
-
-				if (File.Exists(filepath) == true) return;
-
-				await image.SaveAsAsync(directory, filename);
-			});
+            var tweetImage = MediaSources.First(media => media.ToUri().AbsoluteUri == content.AbsoluteUri);
+            Service.MediaViewerService.Insert(new MediaOverlayViewModel(tweetImage, MediaSources, OriginTweet));
 		}
 
         public async void Retweet(object obj)
@@ -125,15 +113,35 @@ namespace FavColle.ViewModel
 
             var client = DI.Resolve<TwitterClient>();
 
-            if (!IsRetweeted)
+            try
             {
-                IsRetweeted = true;
-                await client.Retweet(Id);
+                if (!IsRetweeted)
+                {
+                    IsRetweeted = true;
+                    await client.Retweet(Id);
+                    RetweetCount++;
+                }
+                else
+                {
+                    IsRetweeted = false;
+                    await client.UnRetweet(Id);
+                    RetweetCount--;
+                }
             }
-            else
+            catch (AggregateException aggregate)
             {
-                IsRetweeted = false;
-                await client.UnRetweet(Id);
+                foreach (var e in aggregate.InnerExceptions)
+                {
+                    if (e is CoreTweet.TwitterException)
+                    {
+                        // 以下のケースはどうしようもないから無視
+                        // ・リツイート済をリツイート
+                        // ・リツイート未をリツイート外す
+                        // ・リツイート失敗
+                        continue;
+                    }
+                    throw e;
+                }
             }
         }
 
@@ -143,17 +151,33 @@ namespace FavColle.ViewModel
 
             var client = DI.Resolve<TwitterClient>();
 
-            if (!IsFavorited)
+            try
             {
-                IsFavorited = true;
-                FavoriteCount++;
-                await client.Favorite(Id);
+                if (!IsFavorited)
+                {
+                    IsFavorited = true;
+                    FavoriteCount++;
+                    await client.Favorite(Id);
+                }
+                else
+                {
+                    IsFavorited = false;
+                    FavoriteCount--;
+                    await client.UnFavorite(Id);
+                }
             }
-            else
+            catch (AggregateException aggregate)
             {
-                IsFavorited = false;
-                FavoriteCount--;
-                await client.UnFavorite(Id);
+                foreach (var e in aggregate.InnerExceptions)
+                {
+                    if (e is CoreTweet.TwitterException)
+                    {
+                        // 以下のケースはどうしようもないから無視
+                        // ・ふぁぼ済をふぁぼった
+                        // ・ふぁぼったをふぁぼらないにした
+                        // ・ふぁぼ失敗
+                    }
+                }
             }
         }
     }

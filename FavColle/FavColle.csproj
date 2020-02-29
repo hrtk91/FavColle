@@ -93,9 +93,12 @@
     </ApplicationDefinition>
     <Compile Include="DIContainer\DI.cs" />
     <Compile Include="Model\Interface\ITwitterImage.cs" />
+    <Compile Include="Model\MediaViewState.cs" />
     <Compile Include="Model\ProfileImage.cs" />
     <Compile Include="Model\SizeOpt.cs" />
+    <Compile Include="Service\MediaViewerService.cs" />
     <Compile Include="Service\PopupService.cs" />
+    <Compile Include="ViewModel\MediaOverlayViewModel.cs" />
     <Compile Include="ViewModel\ReactiveCommand.cs" />
     <Compile Include="Model\TweetImage.cs" />
     <Compile Include="ViewModel\SearchWindowViewModel.cs" />
@@ -118,8 +121,8 @@
     <Compile Include="View\SearchWindow.xaml.cs">
       <DependentUpon>SearchWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\UserControl\ImageViewer.xaml.cs">
-      <DependentUpon>ImageViewer.xaml</DependentUpon>
+    <Compile Include="View\UserControl\MediaViewer.xaml.cs">
+      <DependentUpon>MediaViewer.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\UserControl\TweetControl.xaml.cs">
       <DependentUpon>TweetControl.xaml</DependentUpon>
@@ -155,6 +158,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="View\Resource\CircleButton.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="View\Resource\FavRetButton.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -171,7 +178,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\UserControl\ImageViewer.xaml">
+    <Page Include="View\UserControl\MediaViewer.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -229,7 +236,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />
-    <Folder Include="Service\Control\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

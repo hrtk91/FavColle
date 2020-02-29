@@ -51,12 +51,12 @@ namespace FavColle.ViewModel
             await Client.Initialize();
             await Authorize(window);
 
-            CurrentPage = new View.Pages.TimelinePage
-            {
-                DataContext = window.DataContext
-            };
+            //CurrentPage = new View.Pages.TimelinePage
+            //{
+            //    DataContext = window.DataContext
+            //};
 
-            window.Frame.Navigate(CurrentPage);
+            //window.Frame.Navigate(CurrentPage);
         }
 
         private async void FetchHomeTimeline(object obj)

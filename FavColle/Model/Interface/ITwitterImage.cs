@@ -12,7 +12,8 @@ namespace FavColle.Model.Interface
         string Url { get; set; }
         byte[] Data { get; set; }
         Task<ITwitterImage> Download(SizeOpt size);
-        Task SaveAsAsync(string directory, string filename);
+        Task SaveAsAsync(Uri source, string filepath);
         ImageSource Convert();
+        Uri ToUri(SizeOpt size = SizeOpt.Small);
     }
 }

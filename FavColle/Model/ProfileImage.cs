@@ -58,15 +58,15 @@ namespace FavColle.Model
             return bitmapImage;
         }
 
-        public async Task SaveAsAsync(string directory, string filename)
-        {
-            var filepath = directory + filename;
-            if (File.Exists(filepath) == true) return;
+        public Uri ToUri(SizeOpt option = SizeOpt.Orig)
+            => new Uri(Url);
 
+        public async Task SaveAsAsync(Uri source, string filepath)
+        {
             try
             {
                 var client = new CachedWebClient();
-                await client.SaveAsAsync(Url, filepath);
+                await client.SaveAsAsync(source.AbsoluteUri, filepath);
             }
             catch (AggregateException e)
             {

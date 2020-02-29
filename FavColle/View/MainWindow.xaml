@@ -11,7 +11,7 @@
         xmlns:ei="http://schemas.microsoft.com/expression/2010/interactions"
         x:Name="this"
         mc:Ignorable="d"
-        Title="MainWindow" Height="600" Width="525">
+        Title="MainWindow" Height="600" Width="600">
     
     <Window.DataContext>
         <vm:MainViewModel/>
@@ -110,7 +110,41 @@
             </StackPanel>
         </Grid>
         <Grid Grid.Row="1">
-            <Frame x:Name="Frame"/>
+            <ListBox x:Name="TweetListBox"
+                 ItemsSource="{Binding Path=TweetList}"
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                 ScrollViewer.CanContentScroll="False"
+                 b:ScrollBehavior.ScrollCommand="{Binding ScrollCommand}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <v:TweetControl/>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+                <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Vertical"/>
+                    </ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem">
+                        <Setter Property="OverridesDefaultStyle" Value="True"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="ListBoxItem">
+                                    <Border Name="Bd" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="true">
+                                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                                    </Border>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True"/>
+                            <Trigger Property="IsSelected" Value="True"/>
+                        </Style.Triggers>
+                    </Style>
+                </ListBox.ItemContainerStyle>
+            </ListBox>
         </Grid>
     </Grid>
 </Window>

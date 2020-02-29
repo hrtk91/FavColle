@@ -117,12 +117,12 @@ namespace FavColle.Model
 			return (result.ScreenName, new Uri(result.ProfileImageUrl));
 		}
 
-		public async Task<IEnumerable<Tweet>> FetchHomeTimeline(long? sinceid = null, long? maxid = null, int? num = 100)
+		public async Task<IEnumerable<ITweet>> FetchHomeTimeline(long? sinceid = null, long? maxid = null, int? num = 100)
 		{
 			var result = await Tokens.Statuses.HomeTimelineAsync(since_id => sinceid, max_id => maxid, count => num);
 			var tweets = result.Select(status =>
 			{
-				var tweet = status.RetweetedStatus != null ? GetRetweetContent(status) : GetTweetContent(status);
+				var tweet = TweetFactory.Create(status);
 
 				var entities = status.ExtendedEntities ?? status.Entities;
 				if (entities?.Media == null) return tweet;
@@ -146,62 +146,20 @@ namespace FavColle.Model
 			return tweets;
 		}
 
-        private Tweet GetTweetContent(Status status)
-        {
-            return new Tweet(status);
-        }
-
-        private Tweet GetRetweetContent(Status status)
-        {
-            var retweet = status.RetweetedStatus;
-            var tweet = new Tweet(
-                retweet.User.ProfileImageUrl,
-                retweet.User.Name,
-                retweet.User.ScreenName,
-                status.Id,
-                retweet.FullText ?? retweet.Text,
-                status.IsRetweeted ?? false,
-                status.IsFavorited ?? false,
-                retweet.RetweetCount ?? 0,
-                retweet.FavoriteCount ?? 0,
-                new Tweet(
-                    status.User.ProfileImageUrl,
-                    status.User.Name,
-                    status.User.ScreenName,
-                    status.Id,
-                    status.FullText ?? status.Text));
-
-            return tweet;
-        }
-
-
-        public async Task<IEnumerable<Tweet>> GetSelfTimeline(bool excludeReply = true, bool includeRetweet = true)
+        public async Task<IEnumerable<ITweet>> GetSelfTimeline(bool excludeReply = true, bool includeRetweet = true)
 		{
 			return await GetUserTimeline(Tokens.ScreenName, excludeReply, includeRetweet);
 		}
 
 
-		public async Task<IEnumerable<Tweet>> GetUserTimeline(string screenName, bool excludeReply = false, bool includeRetweet = false)
+		public async Task<IEnumerable<ITweet>> GetUserTimeline(string screenName, bool excludeReply = false, bool includeRetweet = false)
 		{
 			Debug.WriteLine("GetTimeline Start");
 
 			int num = 100;
 			var result = await Tokens.Statuses.UserTimelineAsync(screen_name => screenName, count => num, exclude_replies => excludeReply, include_rts => includeRetweet);
 			var timeline = result;
-			var tweets = timeline.Select(status =>
-			{
-				var tweet = new Tweet(
-					status.User.ProfileImageUrl,
-					status.User.Name,
-					status.User.ScreenName,
-					status.Id,
-					status.FullText ?? status.Text,
-					status.IsRetweeted ?? false,
-                    status.IsFavorited ?? false,
-					null,
-					status.ExtendedEntities?.Media.Select(media => new TweetImage(media.MediaUrl)));
-				return tweet;
-			});
+			var tweets = timeline.Select(status => TweetFactory.Create(status));
 
 			Debug.WriteLine("GetTimeline End");
 
@@ -209,11 +167,11 @@ namespace FavColle.Model
 		}
 
 
-		public void WriteConsole(IEnumerable<Tweet> tweets)
+		public void WriteConsole(IEnumerable<ITweet> tweets)
 		{
 			tweets.ToList().ForEach(tweet =>
 			{
-				var name = tweet.ScreenName;
+				var name = tweet.User.ScreenName;
 				var text = tweet.Text;
 				var medias = tweet.Medias;
 				Console.WriteLine("{0}:{1}:{2}", name, text, medias != null ? string.Concat(medias?.Select(url => "[" + url + "]")) : "");
@@ -221,48 +179,18 @@ namespace FavColle.Model
 		}
 
 
-		public async Task<IEnumerable<Tweet>> Search(string keyword, long? maxid = null, int num = 15)
+		public async Task<IEnumerable<ITweet>> Search(string keyword, long? maxid = null, int num = 15)
 		{
 			Debug.WriteLine("searchTweet Start : Keyword={0}", keyword);
 
 			var result = await Tokens.Search.TweetsAsync(count => num, q => keyword, max_id => maxid);
-			Func<CoreTweet.Status, Tweet> tweetSelector = status =>
-			{
-				var tweet = new Tweet(
-					status.User.ProfileImageUrl,
-					status.User.Name,
-					status.User.ScreenName,
-					status.Id,
-					status.FullText ?? status.Text,
-                    status.IsRetweeted ?? false,
-                    status.IsFavorited ?? false,
-                    status.RetweetCount ?? 0,
-                    status.FavoriteCount ?? 0);
-
-				var entities = status.ExtendedEntities ?? status.Entities;
-				if (entities?.Media == null) return tweet;
-
-				var photos = entities.Media
-						.Where(media => media.Type == "photo")
-						.Select(media => media.MediaUrl);
-				tweet.Medias = photos.Select(url => new TweetImage(url));
-
-				//tweet.Medias = tweet.Medias.Concat(
-				//	status.ExtendedEntities.Media
-				//		.Where(media => media.Type == "animated_gif" || media.Type == "video")
-				//		.SelectMany(
-				//			media => media?.VideoInfo?.Variants
-				//				.Select(video => video.Url))
-				//				.Where(url => System.IO.Path.GetExtension(url) == ".mp4"));
-
-				return tweet;
-			};
+			Func<CoreTweet.Status, ITweet> tweetSelector = status => TweetFactory.Create(status);
 
 			return result.Select(tweetSelector);
         }
 
 
-		public async Task<IEnumerable<Tweet>> SearchImageTweet(string keyword)
+		public async Task<IEnumerable<ITweet>> SearchImageTweet(string keyword)
 		{
 			IEnumerable<Tweet> tweetList = null;
 			try
@@ -272,25 +200,20 @@ namespace FavColle.Model
 				var resultList = new List<SearchResult>();
 				var result = await Tokens.Search.TweetsAsync(count => 100, q => keyword);
 				var mediaTweets = result.Where(status => status.Entities.Media != null);//.Select(status => Tokens.Statuses.Show(status.Id));
-				Func<Status, Tweet> tweetSelector = status =>
-				{
-					var tweet = new Tweet(
-						status.User.Name,
-						status.User.ScreenName,
-						status.Id,
-						status.FullText ?? status.Text,
-						status.ExtendedEntities.Media.Where(media => media.Type == "photo").Select(media => new TweetImage(media.MediaUrl)));
+				Func<Status, Tweet> tweetSelector = status => new Tweet(status);
+				//{
+				//	var tweet = new Tweet(status);
 
-					//tweet.MediaURLs = tweet.MediaURLs.Concat(
-					//	status.ExtendedEntities.Media
-					//		.Where(media => media.Type == "animated_gif" || media.Type == "video")
-					//		.SelectMany(
-					//			media => media.VideoInfo.Variants
-					//				.Select(video => video.Url))
-					//				.Where(url => System.IO.Path.GetExtension(url) == ".mp4"));
+				//	tweet.MediaURLs = tweet.MediaURLs.Concat(
+				//		status.ExtendedEntities.Media
+				//			.Where(media => media.Type == "animated_gif" || media.Type == "video")
+				//			.SelectMany(
+				//				media => media.VideoInfo.Variants
+				//					.Select(video => video.Url))
+				//					.Where(url => System.IO.Path.GetExtension(url) == ".mp4"));
 
-					return tweet;
-				};
+				//	return tweet;
+				//};
 
 				tweetList = mediaTweets.Select(tweetSelector);
 
@@ -330,7 +253,7 @@ namespace FavColle.Model
 		}
 
 
-		public void OutputTweetList(IEnumerable<Tweet> tweetlist)
+		public void OutputTweetList(IEnumerable<ITweet> tweetlist)
 		{
 			using (var sw = new System.IO.StreamWriter("./out.log", false, Encoding.UTF8))
 			{
@@ -343,13 +266,13 @@ namespace FavColle.Model
 		}
 
 
-		public void DownloadImages(IEnumerable<Tweet> tweetlist)
+		public void DownloadImages(IEnumerable<ITweet> tweetlist)
 		{
 			DownloadImages("./image/", tweetlist);
 		}
 
 
-		public void DownloadImages(string directory, IEnumerable<Tweet> tweetlist)
+		public void DownloadImages(string directory, IEnumerable<ITweet> tweetlist)
 		{
 			var downloadlist = tweetlist.SelectMany(tweet => tweet.Medias).Distinct();
 
@@ -432,7 +355,7 @@ namespace FavColle.Model
 			public int NowRetrived;
 			public bool HasReachedRateLimit;
 			public int RateLimitElapsedTime;
-			public IEnumerable<Tweet> TweetList;
+			public IEnumerable<ITweet> TweetList;
 
 			public FavoritesRetrieveEventArgs(int maximum, int nowRetrived)
 			{
@@ -443,7 +366,7 @@ namespace FavColle.Model
 				TweetList = null;
 			}
 
-            public FavoritesRetrieveEventArgs(int count, int nowRetrived, IEnumerable<Tweet> tweetList) : this(count, nowRetrived)
+            public FavoritesRetrieveEventArgs(int count, int nowRetrived, IEnumerable<ITweet> tweetList) : this(count, nowRetrived)
             {
                 TweetList = tweetList;
             }
@@ -456,12 +379,12 @@ namespace FavColle.Model
 		}
 
 
-		public async Task<IEnumerable<Tweet>> GetMyFavorites(int num = 20, long? maxid = null)
+		public async Task<IEnumerable<ITweet>> GetMyFavorites(int num = 20, long? maxid = null)
 		{
 			var result = await Tokens.Favorites.ListAsync(count => num, max_id => maxid);
 			var favorites = result.Select(status =>
 			{
-				var tweet = new Tweet(status.User.ProfileImageUrl, status.User.Name, status.User.ScreenName, status.Id, status.FullText ?? status.Text);
+				var tweet = TweetFactory.Create(status);
 				var entities = status.ExtendedEntities ?? status.Entities;
 				if (entities?.Media == null) return tweet;
 
@@ -476,7 +399,7 @@ namespace FavColle.Model
 		}
 
 
-		public async Task<IEnumerable<Tweet>> GetMyFavoritesContinuously()
+		public async Task<IEnumerable<ITweet>> GetMyFavoritesContinuously()
 		{
 			var user = await Tokens.Account.VerifyCredentialsAsync();
 			var maxnum = 3200;
